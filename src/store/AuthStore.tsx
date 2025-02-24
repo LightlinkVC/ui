@@ -1,3 +1,4 @@
+// AuthStore.ts
 import { makeAutoObservable, runInAction } from "mobx";
 import { axiosInstance } from "../api/api.config";
 
@@ -8,34 +9,49 @@ const getCookie = (name: string) => {
 };
 
 class AuthStore {
-  // Убрали хранение токена в localStorage
   isAuthenticated: boolean = false;
+  userId: number | null = null;
 
   constructor() {
     makeAutoObservable(this);
     this.initializeAuth();
   }
 
-  // Проверяем аутентификацию при инициализации
-  private initializeAuth() {
-    this.isAuthenticated = this.checkAuthCookie();
+  private async initializeAuth() {
+    const isAuth = this.checkAuthCookie();
+    runInAction(() => {
+      this.isAuthenticated = isAuth;
+    });
+    if (isAuth) {
+      await this.fetchCurrentUser();
+    }
   }
 
   private checkAuthCookie(): boolean {
-    // Проверяем наличие хотя бы одного из токенов
     return !!getCookie('access_token') || !!getCookie('refresh_token');
+  }
+
+  async fetchCurrentUser() {
+    try {
+      const response = await axiosInstance.get("/api/me");
+      runInAction(() => {
+        this.userId = response.data.id;
+      });
+    } catch (error) {
+      console.error("Failed to fetch current user", error);
+    }
   }
 
   async register(username: string, password: string) {
     try {
-      await axiosInstance.post("/api/signup", { 
+      const response = await axiosInstance.post("/api/signup", { 
         username, 
         password 
       });
 
-      // После регистрации проверяем установку кук
       runInAction(() => {
-        this.isAuthenticated = this.checkAuthCookie();
+        this.isAuthenticated = true;
+        this.userId = response.data.userId;
       });
     } catch (error) {
       console.error("Registration failed", error);
@@ -44,13 +60,14 @@ class AuthStore {
 
   async login(username: string, password: string) {
     try {
-      await axiosInstance.post("/api/login", {
+      const response = await axiosInstance.post("/api/login", {
         username,
         password
       });
 
       runInAction(() => {
-        this.isAuthenticated = this.checkAuthCookie();
+        this.isAuthenticated = true;
+        this.userId = response.data.userId;
       });
     } catch (error) {
       console.error("Login failed", error);
@@ -61,27 +78,12 @@ class AuthStore {
     axiosInstance.post("/api/logout").finally(() => {
       runInAction(() => {
         this.isAuthenticated = false;
+        this.userId = null;
       });
     });
   }
 
-  async refreshToken() {
-    try {
-      if (!this.checkAuthCookie()) {
-        // window.location.href = "/login";
-        return;
-      }
-      
-      await axiosInstance.get("/api/refresh");
-      
-      runInAction(() => {
-        this.isAuthenticated = this.checkAuthCookie();
-      });
-    } catch (error) {
-      console.error("Refresh token failed", error);
-      this.logout();
-    }
-  }
+  // ... остальные методы
 }
 
 export const authStore = new AuthStore();
