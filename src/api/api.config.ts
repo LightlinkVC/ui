@@ -37,11 +37,10 @@ axiosInstance.interceptors.response.use(
 
       try {
         await authStore.refreshToken();
-        
-        delete originalRequest.headers.Authorization;
 
-        return axiosInstance(originalRequest);
+        return axiosInstance.request(originalRequest);
       } catch (refreshError) {
+        console.error("Token refresh failed or expired", refreshError);
         authStore.logout();
         window.location.href = "/login";
         return Promise.reject(refreshError);

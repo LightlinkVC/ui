@@ -1,6 +1,6 @@
-// MessageInput.tsx
 import React, { useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
+import { authStore } from '../../store/AuthStore';
 
 type MessageInputProps = {
   groupId: number;
@@ -15,12 +15,31 @@ const MessageInput = ({ groupId, onNewMessage }: MessageInputProps) => {
     if (!message.trim()) return;
 
     try {
+      const userId = authStore.userId;
+
+      const newMessage = {
+        user_id: userId, // Подставьте реальный user_id
+        group_id: groupId,
+        content: message,
+        id: 'temp-id', // Уникальный временный ID
+      };
+
+      // Отправляем сообщение на сервер
       const response = await axiosInstance.post('/api/messages', {
         group_id: groupId,
-        content: message
+        content: message,
       });
-      
-      onNewMessage(response.data);
+
+      // Если сервер возвращает данные о сообщении, обновляем состояние с реальным id
+      const messageWithId = {
+        ...newMessage,
+        id: response.data.id || newMessage.id,
+      };
+
+      // Обновляем сообщения с новым сообщением
+      onNewMessage(messageWithId);
+
+      // Очищаем поле ввода
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);

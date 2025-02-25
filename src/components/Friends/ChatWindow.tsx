@@ -1,13 +1,12 @@
-// ChatWindow.tsx
 import { useState, useEffect, useRef } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import MessageInput from './MessageInput';
 
 type Message = {
-  id: number;
+  id: string;
   user_id: number;
+  group_id: number;
   content: string;
-  created_at: string;
 };
 
 const ChatWindow = ({ groupId }: { groupId: number }) => {
@@ -41,7 +40,9 @@ const ChatWindow = ({ groupId }: { groupId: number }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Обработчик нового сообщения
   const handleNewMessage = (newMessage: Message) => {
+    // Добавляем новое сообщение в начало списка
     setMessages(prev => [...prev, newMessage]);
   };
 
@@ -55,9 +56,6 @@ const ChatWindow = ({ groupId }: { groupId: number }) => {
           <div key={message.id} className="message">
             <div className="message-header">
               <span className="user-id">User #{message.user_id}</span>
-              <span className="timestamp">
-                {new Date(message.created_at).toLocaleTimeString()}
-              </span>
             </div>
             <div className="message-content">{message.content}</div>
           </div>

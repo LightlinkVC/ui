@@ -1,5 +1,4 @@
-// MainPage.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
@@ -13,26 +12,34 @@ const MainPage = () => {
 
   const handleFriendSelect = async (friendId: number) => {
     try {
-      // Получаем groupId для выбранного друга
       const response = await axiosInstance.get(`/api/get-group-id/${friendId}`);
+
       setSelectedFriend({
         friendId,
-        groupId: response.data.groupId
+        groupId: response.data.group_id
       });
+
+      console.log("Request completed for friend:", friendId);
     } catch (error) {
-      console.error('Error fetching group ID:', error);
+      console.error("Error fetching group ID:", error);
     }
   };
+
+  useEffect(() => {
+    if (selectedFriend) {
+      console.log("Selected friend updated:", selectedFriend);
+    }
+  }, [selectedFriend]);
 
   return (
     <div className="main-page">
       <h1>Main page</h1>
-      
+
       <div className="content-container">
         <div className="friends-section">
           <h2>Friend list</h2>
           <FriendList onFriendSelect={handleFriendSelect} />
-          
+
           <h2>Pending requests</h2>
           <PendingRequests />
         </div>
