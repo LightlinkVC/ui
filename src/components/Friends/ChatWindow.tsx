@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import MessageInput from './MessageInput';
+import { Centrifuge, Subscription } from 'centrifuge';
 
 type Message = {
   id: string;
@@ -9,13 +10,26 @@ type Message = {
   content: string;
 };
 
-const ChatWindow = ({ groupId }: { groupId: number }) => {
+type ChatWindowProps = {
+  groupId: number;
+  centrifuge: Centrifuge | null;
+};
+
+/*
+  TODO
+
+  1. Обрабатывать ровно одну подписку.
+  2. Убрать ненужное колбэк для добавления сообщений.
+*/
+
+const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const subscriptionRef = useRef<Subscription | null>(null);
+  const isMountedRef = useRef(true);
 
-  // Загрузка сообщений
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -30,8 +44,58 @@ const ChatWindow = ({ groupId }: { groupId: number }) => {
 
     loadMessages();
   }, [groupId]);
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    const setupSubscription = async () => {
+      if (!centrifuge || !isMountedRef.current) return;
 
-  // Автопрокрутка к последнему сообщению
+      try {
+        if (subscriptionRef.current) {
+          console.log(`Unsubscribing from ${subscriptionRef.current.channel}`);
+          subscriptionRef.current.unsubscribe();
+          subscriptionRef.current = null;
+        }
+
+        const channel = `group:${groupId}`;
+        console.log(`Subscribing to ${channel}`);
+        
+        const subscription = centrifuge.newSubscription(channel);
+        
+        subscription
+          .on('publication', (ctx) => {
+            setMessages(prev => [...prev, ctx.data]);
+          })
+          .on('subscribed', () => {
+            console.log(`Subscribed to ${channel}`);
+          })
+          .on('error', (err) => {
+            console.error(`Subscription error in ${channel}:`, err);
+          });
+
+        subscription.subscribe();
+        subscriptionRef.current = subscription;
+        
+      } catch (err) {
+        console.error('Subscription error:', err);
+      }
+    };
+
+    setupSubscription();
+
+    return () => {
+      isMountedRef.current = false;
+      const cleanup = async () => {
+        if (subscriptionRef.current) {
+          console.log(`Cleaning up subscription for ${subscriptionRef.current.channel}`);
+          subscriptionRef.current.unsubscribe();
+          subscriptionRef.current = null;
+        }
+      };
+      cleanup();
+    };
+  }, [groupId, centrifuge]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -40,9 +104,7 @@ const ChatWindow = ({ groupId }: { groupId: number }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Обработчик нового сообщения
   const handleNewMessage = (newMessage: Message) => {
-    // Добавляем новое сообщение в начало списка
     setMessages(prev => [...prev, newMessage]);
   };
 

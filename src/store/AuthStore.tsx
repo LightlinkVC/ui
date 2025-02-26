@@ -14,6 +14,7 @@ const getCookie = (name: string): string | null => {
 class AuthStore {
   isAuthenticated = false;
   userId: number | null = null;
+  token: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -28,6 +29,7 @@ class AuthStore {
     runInAction(() => {
       this.isAuthenticated = !!accessToken && !!refreshToken;
       this.userId = userId ? parseInt(userId) : null;
+      this.token = accessToken ? accessToken : null;
     });
   }
 
@@ -43,6 +45,7 @@ class AuthStore {
         this.isAuthenticated = this.checkAuthCookies();
         const userIdCookie = getCookie('user_id');
         this.userId = userIdCookie ? parseInt(userIdCookie) : null;
+        this.token = getCookie('access_token')
       });
     } catch (error) {
       console.error("Registration failed", error);
@@ -58,6 +61,7 @@ class AuthStore {
         this.isAuthenticated = this.checkAuthCookies();
         const userIdCookie = getCookie('user_id');
         this.userId = userIdCookie ? parseInt(userIdCookie) : null;
+        this.token = getCookie('access_token')
       });
     } catch (error) {
       console.error("Login failed", error);
@@ -70,6 +74,7 @@ class AuthStore {
       runInAction(() => {
         this.isAuthenticated = false;
         this.userId = null;
+        this.token = null
       });
     });
   }
@@ -87,6 +92,7 @@ class AuthStore {
         this.isAuthenticated = this.checkAuthCookies();
         const userIdCookie = getCookie('user_id');
         this.userId = userIdCookie ? parseInt(userIdCookie) : null;
+        this.token = getCookie('access_token')
       });
     } catch (error) {
       console.error("Refresh token failed", error);
