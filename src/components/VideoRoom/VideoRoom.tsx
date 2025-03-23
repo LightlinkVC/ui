@@ -23,7 +23,6 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
   const [centToken, setCentToken] = useState<string | null>(null);
   const [channels, setChannels] = useState<{ room: string; user: string } | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const [remoteVideos, setRemoteVideos] = useState<{[key: string]: string}>({});
   const messageQueueRef = useRef<any[]>([]);
 
   useEffect(() => {
@@ -42,9 +41,12 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
 
   useEffect(() => {
     const startProcess = async () => {
-      if (!centToken || !channels) return;
+      if (!centToken || !channels || !authStore.userId) return;
   
       console.log("Автостарт звонка...");
+
+      initTraceWsConnection()
+      
   
       initCentrifugeSubscriptions();
       console.log("Subscribed to centrifugo");
@@ -72,6 +74,10 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
           existingUserIds: msg.payload.existing_user_ids,
         });
         break;
+
+      case "user_left":
+        handleUserLeft(msg.payload);
+        break;
       case "answer":
         handleAnswer(msg.payload);
         break;
@@ -91,6 +97,26 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
         console.log("Неизвестное сообщение", msg);
     }
   };
+
+  const initTraceWsConnection = () => {
+    if (!authStore.userId) return;
+
+    const traceWs = new WebSocket(`ws://localhost/ws/api/room/${roomId}/trace?userID=${authStore.userId}`);
+
+    traceWs.onopen = () => {
+      console.log("WebSocket для мониторинга статуса подключен");
+    };
+
+    traceWs.onerror = (error) => {
+      console.error("WebSocket ошибка:", error);
+    };
+
+    return () => {
+      if (traceWs.readyState === WebSocket.OPEN) {
+        traceWs.send(JSON.stringify({ status: 'inactive' }));
+      }
+    };
+  }
 
   const initCentrifugeSubscriptions = () => {
     if (!centToken || !channels) return;
@@ -127,14 +153,26 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
     });
   }
 
+  const handleUserLeft = (payload: {userId: string}) => {
+    subscribersPeersRef.current.delete(payload.userId)
+
+    const remoteVideo = document.getElementById(`remote-${payload.userId}`);
+    if (remoteVideo) {
+      const videoContainer = document.getElementById('video-container');
+      if (videoContainer) {
+        videoContainer.removeChild(remoteVideo);
+      }
+    }
+  }
+
   const createSubscriberPeer = (userId: string) => {
     if (userId == "") return
 
-    const remoteVideo = document.createElement('video');
-    remoteVideo.id = `remote-${userId}`;
-    remoteVideo.autoplay = true;
-    remoteVideo.playsInline = true;
-    document.getElementById('video-container')?.appendChild(remoteVideo);
+      const remoteVideo = document.createElement('video');
+      remoteVideo.id = `remote-${userId}`;
+      remoteVideo.autoplay = true;
+      remoteVideo.playsInline = true;
+      document.getElementById('video-container')?.appendChild(remoteVideo);
 
     const options = {
       remoteVideo: remoteVideo,
@@ -153,7 +191,6 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
     });
 
     subscribersPeersRef.current.set(userId, peer);
-    setRemoteVideos(prev => ({...prev, [userId]: `remote-${userId}`}));
   };
 
   const handleAnswer = (sdpAnswer: string) => {
