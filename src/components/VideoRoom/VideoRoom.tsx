@@ -89,10 +89,10 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
         handleIceCandidate(msg.payload.candidate);
         console.log(publisherPeerRef.current)
         break;
-        case "subscriber_ice":
-          handleSubscriberIceCandidate(msg.payload);
-          console.log(publisherPeerRef.current)
-          break;
+      case "subscriber_ice":
+        handleSubscriberIceCandidate(msg.payload);
+        console.log(publisherPeerRef.current)
+        break;
       default:
         console.log("Неизвестное сообщение", msg);
     }
@@ -112,6 +112,7 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
     };
 
     return () => {
+      console.log("Trying to kill connection")
       if (traceWs.readyState === WebSocket.OPEN) {
         traceWs.send(JSON.stringify({ status: 'inactive' }));
       }
