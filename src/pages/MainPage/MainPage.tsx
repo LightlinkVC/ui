@@ -1,10 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
 import ChatWindow from '../../components/Friends/ChatWindow';
 import { Centrifuge } from 'centrifuge';
-import { authStore } from "../../store/AuthStore";
 
 const MainPage = () => {
   const [selectedFriend, setSelectedFriend] = useState<{
@@ -28,33 +27,6 @@ const MainPage = () => {
       console.error("Error fetching group ID:", error);
     }
   };
-
-  useEffect(() => {
-    if (!centrifugeRef.current) {
-      console.log("Initializing WebSocket connection...");
-
-      const centrifuge = new Centrifuge('ws://localhost/connection/websocket', {
-        token: authStore.token ?? undefined, // Use token or undefined
-        debug: true,
-      });
-
-      centrifuge.on('connected', (ctx) => {
-        console.log('Connected to Centrifugo', ctx);
-      });
-
-      centrifuge.on('disconnected', (ctx) => {
-        console.log('Disconnected from Centrifugo', ctx);
-      });
-
-      centrifugeRef.current = centrifuge;
-      centrifuge.connect();
-    }
-
-    // 📌 Убираем вызов disconnect() при размонтировании компонента
-    return () => {
-      console.log("MainPage unmounting, but NOT closing WebSocket.");
-    };
-  }, []);
 
   return (
     <div className="main-page">
