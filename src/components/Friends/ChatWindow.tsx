@@ -7,6 +7,7 @@ type Message = {
   id: string;
   user_id: number;
   group_id: number;
+  status: string;
   content: string;
 };
 
@@ -119,7 +120,7 @@ const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
             <div className="message-header">
               <span className="user-id">User #{message.user_id}</span>
             </div>
-            <div className="message-content">{message.content}</div>
+            <div className="message-content">`${message.content} [${message.status}]`</div>
           </div>
         ))}
         <div ref={messagesEndRef} />
