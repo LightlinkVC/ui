@@ -28,7 +28,7 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl })
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        const response = await axiosInstance.get(`/api/room/${roomId}/info`);
+        const response = await axiosInstance.get(`/api/group/${roomId}/info`);
         setCentToken(response.data.token);
         setChannels(response.data.channels);
       } catch (error) {

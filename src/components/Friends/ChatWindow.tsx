@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { Centrifuge } from 'centrifuge';
 import { axiosInstance } from "../../api/api.config";
 import MessageInput from './MessageInput';
-import { Centrifuge, Subscription } from 'centrifuge';
+import { observer } from "mobx-react-lite";
+import { authStore } from '../../store/AuthStore';
 
 type Message = {
   id: string;
@@ -13,7 +15,7 @@ type Message = {
 
 type ChatWindowProps = {
   groupId: number;
-  centrifuge: Centrifuge | null;
+  centrifugoUrl: string;
 };
 
 /*
@@ -23,15 +25,28 @@ type ChatWindowProps = {
   2. Убрать ненужное колбэк для добавления сообщений.
 */
 
-const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
+const ChatWindow = observer(({ groupId, centrifugoUrl }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [centToken, setCentToken] = useState<string | null>(null);
+  const [channels, setChannels] = useState<{ room: string; group_messages: string; user: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const subscriptionRef = useRef<Subscription | null>(null);
-  const isMountedRef = useRef(true);
+  const centrifugeRef = useRef<Centrifuge | null>(null);
 
   useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/group/${groupId}/info`);
+        setCentToken(response.data.token);
+        setChannels(response.data.channels);
+        console.log("Token: ", response.data.token)
+        console.log("Channels: ", response.data.channels)
+      } catch (error) {
+        console.error("Ошибка при получении каналов:", error);
+      }
+    };
+
     const loadMessages = async () => {
       try {
         const response = await axiosInstance.get(`/api/messages/${groupId}`);
@@ -43,59 +58,23 @@ const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
       }
     };
 
+    fetchChannels();
+
     loadMessages();
-  }, [groupId]);
+    }, [groupId]);
+
   useEffect(() => {
-    isMountedRef.current = true;
+      const startProcess = async () => {
+        if (!centToken || !channels || !authStore.userId) return;
+  
+        // initTraceWsConnection()
     
-    const setupSubscription = async () => {
-      if (!centrifuge || !isMountedRef.current) return;
-
-      try {
-        if (subscriptionRef.current) {
-          console.log(`Unsubscribing from ${subscriptionRef.current.channel}`);
-          subscriptionRef.current.unsubscribe();
-          subscriptionRef.current = null;
-        }
-
-        const channel = `group:${groupId}`;
-        console.log(`Subscribing to ${channel}`);
-        
-        const subscription = centrifuge.newSubscription(channel);
-        
-        subscription
-          .on('publication', (ctx) => {
-            setMessages(prev => [...prev, ctx.data]);
-          })
-          .on('subscribed', () => {
-            console.log(`Subscribed to ${channel}`);
-          })
-          .on('error', (err) => {
-            console.error(`Subscription error in ${channel}:`, err);
-          });
-
-        subscription.subscribe();
-        subscriptionRef.current = subscription;
-        
-      } catch (err) {
-        console.error('Subscription error:', err);
-      }
-    };
-
-    setupSubscription();
-
-    return () => {
-      isMountedRef.current = false;
-      const cleanup = async () => {
-        if (subscriptionRef.current) {
-          console.log(`Cleaning up subscription for ${subscriptionRef.current.channel}`);
-          subscriptionRef.current.unsubscribe();
-          subscriptionRef.current = null;
-        }
+        initCentrifugeSubscriptions();
+        console.log("Subscribed to centrifugo");
       };
-      cleanup();
-    };
-  }, [groupId, centrifuge]);
+    
+      startProcess();
+    }, [centToken]);
 
   useEffect(() => {
     scrollToBottom();
@@ -108,6 +87,61 @@ const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
   const handleNewMessage = (newMessage: Message) => {
     setMessages(prev => [...prev, newMessage]);
   };
+
+  const initCentrifugeSubscriptions = () => {
+    if (!centToken || !channels) return;
+
+    const centrifuge = new Centrifuge(centrifugoUrl, { token: centToken });
+    centrifugeRef.current = centrifuge;
+
+    const groupSub = centrifuge.newSubscription(channels.group_messages);
+
+    groupSub.on("publication", (ctx) => handleGroupMessage(ctx.data));
+
+    groupSub.subscribe();
+    centrifuge.connect();
+
+    return () => {
+      groupSub.unsubscribe();
+      centrifuge.disconnect();
+    };
+  };
+
+  const handleGroupMessage = (msg: any) => {
+    console.log("Обработка сообщения:", msg);
+    switch (msg.type) {
+      case "newMessage":
+        if (authStore.userId && msg.payload.user_id != authStore.userId)
+          handleNewMessage(msg.payload);
+        break;
+      case "hateUpdate":
+        console.log(msg.payload)
+        break;
+      default:
+        console.log("Неизвестное сообщение", msg);
+    }
+  };
+
+  const initTraceWsConnection = () => {
+    if (!authStore.userId) return;
+
+    const traceWs = new WebSocket(`ws://localhost/ws/api/room/${groupId}/trace?userID=${authStore.userId}`);
+
+    traceWs.onopen = () => {
+      console.log("WebSocket для мониторинга статуса подключен");
+    };
+
+    traceWs.onerror = (error) => {
+      console.error("WebSocket ошибка:", error);
+    };
+
+    return () => {
+      console.log("Trying to kill connection")
+      if (traceWs.readyState === WebSocket.OPEN) {
+        traceWs.send(JSON.stringify({ status: 'inactive' }));
+      }
+    };
+  }
 
   if (loading) return <div>Loading messages...</div>;
   if (error) return <div>{error}</div>;
@@ -128,6 +162,6 @@ const ChatWindow = ({ groupId, centrifuge }: ChatWindowProps) => {
       <MessageInput groupId={groupId} onNewMessage={handleNewMessage} />
     </div>
   );
-};
+});
 
 export default ChatWindow;

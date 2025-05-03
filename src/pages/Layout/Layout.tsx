@@ -57,7 +57,7 @@ const Layout: FC = () => {
     if (!centToken || !channels) return;
     console.log("connecting basic cent")
     const centrifuge = new Centrifuge(
-      "ws://localhost:8000/connection/websocket", 
+      "ws://localhost:8000/connection/websocket",
       { token: centToken },
     );
     centrifugeRef.current = centrifuge;

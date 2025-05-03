@@ -1,17 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
 import ChatWindow from '../../components/Friends/ChatWindow';
-import { Centrifuge } from 'centrifuge';
 
 const MainPage = () => {
   const [selectedFriend, setSelectedFriend] = useState<{
     friendId: number;
     groupId: number;
   } | null>(null);
-
-  const centrifugeRef = useRef<Centrifuge | null>(null);
 
   const handleFriendSelect = async (friendId: number) => {
     try {
@@ -44,8 +41,8 @@ const MainPage = () => {
         <div className="chat-section">
           {selectedFriend ? (
             <ChatWindow 
-              groupId={selectedFriend.groupId} 
-              centrifuge={centrifugeRef.current} // 📌 Передаём одно подключение
+              groupId={selectedFriend.groupId}
+              centrifugoUrl='ws://localhost:8000/connection/websocket'
             />
           ) : (
             <div className="chat-placeholder">
