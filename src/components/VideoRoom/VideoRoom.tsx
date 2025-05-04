@@ -10,34 +10,20 @@ import kurentoUtils from "kurento-utils";
 interface VideoCallProps {
   roomId: string;
   centrifugoUrl: string;
+  centToken: string;
+  channels: { room: string; user: string };
 }
 
 interface RoomMeta {
   existingUserIds: string[],
 }
 
-const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl }) => {
+const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, centToken, channels }) => {
   const publisherPeerRef = useRef<any>(null);
   const subscribersPeersRef = useRef<Map<string, any>>(new Map());
   const centrifugeRef = useRef<Centrifuge | null>(null);
-  const [centToken, setCentToken] = useState<string | null>(null);
-  const [channels, setChannels] = useState<{ room: string; user: string } | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const messageQueueRef = useRef<any[]>([]);
-
-  useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        const response = await axiosInstance.get(`/api/group/${roomId}/info`);
-        setCentToken(response.data.token);
-        setChannels(response.data.channels);
-      } catch (error) {
-        console.error("Ошибка при получении каналов:", error);
-      }
-    };
-
-    fetchChannels();
-  }, [roomId]);
 
   useEffect(() => {
     const startProcess = async () => {

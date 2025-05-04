@@ -16,6 +16,8 @@ type Message = {
 type ChatWindowProps = {
   groupId: number;
   centrifugoUrl: string;
+  centToken: string;
+  channels: { room: string; user: string; group_messages: string };
 };
 
 /*
@@ -25,28 +27,14 @@ type ChatWindowProps = {
   2. Убрать ненужное колбэк для добавления сообщений.
 */
 
-const ChatWindow = observer(({ groupId, centrifugoUrl }: ChatWindowProps) => {
+const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [centToken, setCentToken] = useState<string | null>(null);
-  const [channels, setChannels] = useState<{ room: string; group_messages: string; user: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const centrifugeRef = useRef<Centrifuge | null>(null);
 
   useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        const response = await axiosInstance.get(`/api/group/${groupId}/info`);
-        setCentToken(response.data.token);
-        setChannels(response.data.channels);
-        console.log("Token: ", response.data.token)
-        console.log("Channels: ", response.data.channels)
-      } catch (error) {
-        console.error("Ошибка при получении каналов:", error);
-      }
-    };
-
     const loadMessages = async () => {
       try {
         const response = await axiosInstance.get(`/api/messages/${groupId}`);
@@ -57,8 +45,6 @@ const ChatWindow = observer(({ groupId, centrifugoUrl }: ChatWindowProps) => {
         setLoading(false);
       }
     };
-
-    fetchChannels();
 
     loadMessages();
     }, [groupId]);
