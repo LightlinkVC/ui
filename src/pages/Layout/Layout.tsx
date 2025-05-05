@@ -4,6 +4,15 @@ import { Outlet } from "react-router-dom";
 import { axiosInstance } from "../../api/api.config";
 import { Centrifuge } from 'centrifuge';
 
+import { useCallModalStore } from '../../store/CallModalStore';
+import IncomingCallModal from '../../components/Notifications/IncomingCall/IncomingCallModal';
+
+import FriendRequestModal from '../../components/Notifications/FriendRequest/FriendRequestModal';
+import { useFriendRequestModalStore } from '../../store/FriendRequestModalStore';
+
+import IncomingMessageModal from '../../components/Notifications/IncomingMessage/IncomingMessageModal';
+import { useIncomingMessageModalStore } from '../../store/MessageModalStore';
+
 interface FriendRequestPayload {
   fromUserId: string,
   fromUsername: string,
@@ -20,6 +29,7 @@ interface IncomingMessagePayload {
 
 interface IncomingCallPayload {
   fromUserId: string,
+  fromUsername: string,
   toUserId: string,
   roomId: string,
 }
@@ -101,21 +111,79 @@ const Layout: FC = () => {
         })
 
         break;
+      case "incomingCall":
+        handleIncomingCall({ 
+          fromUserId: messageObject.from_user_id,
+          fromUsername: messageObject.from_username,
+          toUserId: messageObject.to_user_id,
+          roomId: messageObject.room_id,
+        })
+
+        break;
       default:
         console.log("Неизвестное сообщение", messageObject);
     }
   };
 
   const handleIncomingFriendRequest = (friendRequestMessage: FriendRequestPayload) => {
-    
+    useFriendRequestModalStore.getState().show(
+      friendRequestMessage.fromUsername,
+      "хочет добавить вас в друзья"
+    );  
   }
-  const handleIncomingMessage = (incomingMessageRequest: IncomingMessagePayload) => {
 
+  const handleIncomingMessage = (incomingMessageRequest: IncomingMessagePayload) => {
+    useIncomingMessageModalStore.getState().show(
+      incomingMessageRequest.fromUsername,
+      incomingMessageRequest.content
+    );
   }
+
+  // // debug only (incoming call)
+  // useEffect(() => {
+  //   useCallModalStore.getState().showModal(
+  //     "TestUser",
+  //     () => console.log("Принято (dev)"),
+  //     () => console.log("Отклонено (dev)")
+  //   );
+  // }, []);
+
+  // debug only (friend request)
+  // useEffect(() => {
+  //   useFriendRequestModalStore.getState().show(
+  //     "DevUser",
+  //     "хочет добавить вас в друзья"
+  //   );
+  // }, []);
+
+  // debug only (incoming message)
+  // useEffect(() => {
+  //   useIncomingMessageModalStore.getState().show(
+  //     "DevUser",
+  //     "Тестовове сообщение"
+  //   );
+  // }, []);
+
+  const handleIncomingCall = (incomingCallRequest: IncomingCallPayload) => {
+    const { fromUsername } = incomingCallRequest;
+  
+    useCallModalStore.getState().showModal(
+      fromUsername,
+      () => {
+        console.log('Звонок принят');
+      },
+      () => {
+        console.log('Звонок отклонён');
+      }
+    );
+  };
 
   return (
     <>
       <Outlet />
+      <IncomingCallModal />
+      <FriendRequestModal />
+      <IncomingMessageModal />
     </>
   )
 };

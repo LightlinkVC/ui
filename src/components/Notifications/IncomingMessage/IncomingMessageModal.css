@@ -1,0 +1,39 @@
+.im-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
+    z-index: 9999;
+    max-width: 300px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.im-header {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.im-message {
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.im-ok-button {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.im-ok-button:hover {
+    background-color: #0056b3;  
+}
