@@ -1,26 +1,19 @@
-import { useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
-
-import ChatWithVideo from './ChatWithVideo';
+import { useNavigate } from 'react-router-dom';
 
 const TestMainPage = () => {
-  const [selectedFriend, setSelectedFriend] = useState<{
-    friendId: number;
-    groupId: number;
-  } | null>(null);
+  const navigate = useNavigate();
 
   const handleFriendSelect = async (friendId: number) => {
     try {
       const response = await axiosInstance.get(`/api/get-group-id/${friendId}`);
+      const groupId = response.data.group_id;
 
-      setSelectedFriend({
-        friendId,
-        groupId: response.data.group_id
-      });
+      console.log("Redirecting to group chat:", { friendId, groupId });
 
-      console.log("Selected friend updated:", { friendId, groupId: response.data.group_id });
+      navigate(`/chat/${groupId}`);
     } catch (error) {
       console.error("Error fetching group ID:", error);
     }
@@ -39,17 +32,8 @@ const TestMainPage = () => {
           <PendingRequests />
         </div>
 
-        <div className="chat-section">
-          {selectedFriend ? (
-            <ChatWithVideo 
-              groupId={selectedFriend.groupId}
-              centrifugoUrl='ws://localhost:8000/connection/websocket'
-            />
-          ) : (
-            <div className="chat-placeholder">
-              Select a friend to start chatting
-            </div>
-          )}
+        <div className="chat-placeholder">
+          Select a friend to start chatting
         </div>
       </div>
     </div>

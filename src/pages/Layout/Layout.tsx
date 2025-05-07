@@ -13,6 +13,9 @@ import { useFriendRequestModalStore } from '../../store/FriendRequestModalStore'
 import IncomingMessageModal from '../../components/Notifications/IncomingMessage/IncomingMessageModal';
 import { useIncomingMessageModalStore } from '../../store/MessageModalStore';
 
+import { useCallStore } from '../../store/CallStore';
+import { useNavigate } from "react-router-dom";
+
 interface FriendRequestPayload {
   fromUserId: string,
   fromUsername: string,
@@ -38,6 +41,8 @@ const Layout: FC = () => {
   const [centToken, setCentToken] = useState<string | null>(null);
   const [channels, setChannels] = useState<{ personal: string; } | null>(null);
   const centrifugeRef = useRef<Centrifuge | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (authStore.isAuthenticated && authStore.userId) {
@@ -164,13 +169,26 @@ const Layout: FC = () => {
   //   );
   // }, []);
 
+  useEffect(() => {
+    let incomingCallRequest: IncomingCallPayload = {
+      fromUserId: "1",
+      fromUsername: "test",
+      toUserId: "2",
+      roomId: "1",
+    }
+    handleIncomingCall(incomingCallRequest)
+  }, []);
+
   const handleIncomingCall = (incomingCallRequest: IncomingCallPayload) => {
-    const { fromUsername } = incomingCallRequest;
+    const { fromUsername, roomId } = incomingCallRequest;
   
     useCallModalStore.getState().showModal(
       fromUsername,
       () => {
+        useCallStore.getState().activateRoom(roomId);
         console.log('Звонок принят');
+
+        navigate(`/chat/${roomId}`);
       },
       () => {
         console.log('Звонок отклонён');

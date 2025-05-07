@@ -214,11 +214,33 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
     await axiosInstance.post(`/api/room/${roomId}`);
   }
 
-  const startCall = () => {
+  const startCall = async () => {
     if (!localVideoRef.current) return;
 
+    let mediaConstraints = { audio: true, video: true };
+    let stream: MediaStream;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    } catch (error) {
+      console.warn("Камера недоступна, пробуем только с микрофоном:", error);
+      try {
+        mediaConstraints = { audio: true, video: false };
+        stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      } catch (err) {
+        console.error("Нет доступа даже к микрофону:", err);
+        
+        mediaConstraints = { audio: false, video: false };
+        stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      }
+    }
+
+    if (mediaConstraints.video && stream.getVideoTracks().length > 0) {
+      localVideoRef.current.srcObject = stream;
+    }
+
     const options = {
-      localVideo: localVideoRef.current,
+      mediaStream: stream,
       onicecandidate: (candidate: any) => {
         console.log("New local ICE candidate:", candidate);
         sendToBackend("ice", candidate);
@@ -234,7 +256,6 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
         console.log("Generated SDP Offer");
         sendToBackend("offer", sdpOffer);
         
-        // Инициализируем подписки после создания offer
         publisherPeerRef.current = peer;
 
         console.log("Обрабатываем очередь сообщений:", messageQueueRef.current);
