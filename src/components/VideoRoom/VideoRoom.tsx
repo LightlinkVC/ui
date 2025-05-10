@@ -7,6 +7,8 @@ import { authStore } from '../../store/AuthStore';
 // @ts-ignore
 import kurentoUtils from "kurento-utils";
 
+import "./VideoRoom.css"
+
 interface VideoCallProps {
   roomId: string;
   centrifugoUrl: string;
@@ -155,11 +157,19 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
   const createSubscriberPeer = (userId: string) => {
     if (userId == "") return
 
-      const remoteVideo = document.createElement('video');
-      remoteVideo.id = `remote-${userId}`;
-      remoteVideo.autoplay = true;
-      remoteVideo.playsInline = true;
-      document.getElementById('video-container')?.appendChild(remoteVideo);
+    const videoWrapper = document.createElement('div');
+    videoWrapper.id = `remote-${userId}`; // Идентификатор для каждого пользователя
+    videoWrapper.classList.add("video-tile"); // Класс для стилизации
+
+    // Создаем видео элемент внутри контейнера <div>
+    const remoteVideo = document.createElement('video');
+    remoteVideo.id = `video-${userId}`;
+    remoteVideo.autoplay = true;
+    remoteVideo.playsInline = true;
+    remoteVideo.classList.add("video-element"); // Класс для стилизации видео
+
+    videoWrapper.appendChild(remoteVideo);
+    document.getElementById('video-container')?.appendChild(videoWrapper);
 
     const options = {
       remoteVideo: remoteVideo,
@@ -275,13 +285,124 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
     }
   };
 
+  const calculateGrid = () => {
+    const container = document.querySelector('.video-grid');
+    if (!container) {
+      console.warn("Контейнер видео не найден.");
+      return;
+    }
+    if (!(container instanceof HTMLElement)) {
+      console.warn("Контейнер видео не найден или не является HTMLElement.");
+      return;
+    }
+
+    const tiles = document.querySelectorAll('.video-tile');
+    const gap = 15; // Совпадает с gap в CSS
+    
+    // Получаем размеры контейнера с учетом padding
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    const tileCount = tiles.length;
+    let bestLayout = { cols: 1, rows: 1, width: 0, height: 0 }; 
+    
+    // Находим оптимальное количество колонок и рядов
+    for (let cols = 1; cols <= tileCount; cols++) {
+        const rows = Math.ceil(tileCount / cols);
+        
+        // Рассчитываем размеры плитки
+        const tileWidth = (containerWidth - (cols - 1) * gap) / cols;
+        const tileHeight = (containerHeight - (rows - 1) * gap) / rows;
+        
+        // Проверяем соотношение сторон
+        const aspectRatio = tileWidth / tileHeight;
+        const targetRatio = 4/3;
+        
+        // Вычисляем реальный размер с учетом соотношения
+        let width, height;
+        if (aspectRatio > targetRatio) {
+            height = tileHeight;
+            width = height * targetRatio;
+        } else {
+            width = tileWidth;
+            height = width / targetRatio;
+        }
+        
+        // Если все плитки помещаются - сохраняем лучший вариант
+        if (width * cols + gap * (cols - 1) <= containerWidth &&
+            height * rows + gap * (rows - 1) <= containerHeight) {
+            if (width * height > (bestLayout.width || 0) * (bestLayout.height || 0)) {
+                bestLayout = { cols, rows, width, height };
+            }
+        }
+    }
+    
+    // Применяем лучший вариант
+    container.style.gridTemplateColumns = `repeat(${bestLayout.cols}, ${bestLayout.width}px)`;
+    container.style.gridTemplateRows = `repeat(${bestLayout.rows}, ${bestLayout.height}px)`;
+  }
+
+  useEffect(() => {
+    let resizeTimer: NodeJS.Timeout;
+  
+    // Оптимизация ресайза
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        calculateGrid();
+      }, 100); // Задержка 100 мс для оптимизации
+    };
+  
+    window.addEventListener('resize', onResize);
+  
+    // Очистка слушателя при размонтировании компонента
+    return () => {
+      window.removeEventListener('resize', onResize);
+      clearTimeout(resizeTimer);
+    };
+  }, []); // Пустой массив зависимостей, чтобы это произошло только при монтировании
+  
+
   return (
-    <div>
-      <div>Комната: {roomId}</div>
-      <video ref={localVideoRef} autoPlay playsInline></video>
-      <div id='video-container'></div>
+    <div className="video-room-container">
+      <div id="video-container" className="video-grid">
+        <div className="video-tile">
+          <video
+            ref={localVideoRef}
+            autoPlay
+            playsInline
+            muted
+            className="video-element"
+          ></video>
+        </div>
+      </div>
+      <div className="controls">
+        <button className="control-btn" id="micToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93c-3.94-.49-7-3.85-7-7.93h2c0 3.31 2.69 6 6 6s6-2.69 6-6h2c0 4.08-3.06 7.44-7 7.93V19h4v2H8v-2h4v-3.07z"/>
+            </svg>
+        </button>
+        
+        <button className="control-btn" id="audioToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+        </button>
+        
+        <button className="control-btn" id="screenShare">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1h-3zm-7-3.53v-2.19c-1.78.37-3.2 1.68-3.75 3.27 1.14.55 2.33.93 3.58 1.11L16 13.5V11h1v2.47l3.07 1.53-.56.93-2.51-1.26z"/>
+            </svg>
+        </button>
+        
+        <button className="control-btn danger" id="leaveCall">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0-7c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1s1-.45 1-1v-1c0-.55-.45-1-1-1zm-4.66-2.95l-.71.71c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l.71-.71c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0zM5.64 5.64l.71.71c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zm12.02 0c.39-.39.39-1.02 0-1.41l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l.71.71c.39.39 1.02.39 1.41 0zm2.34 10.34l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l.71.71c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41z"/>
+            </svg>
+        </button>
+      </div>
     </div>
-  );
+  );  
 });
 
 export default VideoRoom;

@@ -1,0 +1,113 @@
+.video-room-container {
+  height: 50%;
+}
+
+.video-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 15px;
+  justify-content: center;
+  align-content: center;
+  padding: 10px;
+}
+
+.video-tile {
+  background: #2d2d2d;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: calc(10px + 1vw);
+  aspect-ratio: 4/3;
+  transition: all 0.3s ease;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Или 'contain', в зависимости от предпочтений */
+  border-radius: 8px;
+}
+
+.controls {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
+  background: rgba(0,0,0,0.7);
+  padding: 15px 25px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+}
+
+.control-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  background: #444;
+  transform: scale(1.1);
+}
+
+.control-btn.active {
+  background: #007bff;
+}
+
+.control-btn.danger {
+  background: #dc3545;
+}
+
+.control-btn.danger:hover {
+  background: #c82333;
+}
+
+.control-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.have_no_acc_wrapper {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.have_no_acc_text {
+  font-family: "Ubuntu-Regular", sans-serif;
+  color: #666;
+  font-size: 14px;
+}
+
+.signup_link {
+  color: #827ffe;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-left: 5px;
+}
+
+.signup_link:hover {
+  color: #6b68d1;
+}
+
+/* Для мобилок */
+@media (max-width: 480px) {
+  .have_no_acc_text {
+    font-size: 12px;
+  }
+}
