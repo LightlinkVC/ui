@@ -169,15 +169,15 @@ const Layout: FC = () => {
   //   );
   // }, []);
 
-  useEffect(() => {
-    let incomingCallRequest: IncomingCallPayload = {
-      fromUserId: "1",
-      fromUsername: "test",
-      toUserId: "2",
-      roomId: "1",
-    }
-    handleIncomingCall(incomingCallRequest)
-  }, []);
+  // useEffect(() => {
+  //   let incomingCallRequest: IncomingCallPayload = {
+  //     fromUserId: "1",
+  //     fromUsername: "test",
+  //     toUserId: "2",
+  //     roomId: "1",
+  //   }
+  //   handleIncomingCall(incomingCallRequest)
+  // }, []);
 
   const handleIncomingCall = (incomingCallRequest: IncomingCallPayload) => {
     const { fromUsername, roomId } = incomingCallRequest;

@@ -1,18 +1,24 @@
-import { axiosInstance } from "../../api/api.config";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
-import { useNavigate } from 'react-router-dom';
+import { axiosInstance } from "../../api/api.config";
+import { Outlet, useParams } from 'react-router-dom';
+import useIsMobile from '../../hooks/Mobile/useIsMobile';
+
+import './TestMainPage.css';
 
 const TestMainPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const { groupId } = useParams();
+
+  const [view, setView] = useState<'friends' | 'requests'>('friends');
+  const isMobile = useIsMobile();
 
   const handleFriendSelect = async (friendId: number) => {
     try {
       const response = await axiosInstance.get(`/api/get-group-id/${friendId}`);
       const groupId = response.data.group_id;
-
-      console.log("Redirecting to group chat:", { friendId, groupId });
-
       navigate(`/chat/${groupId}`);
     } catch (error) {
       console.error("Error fetching group ID:", error);
@@ -20,22 +26,52 @@ const TestMainPage = () => {
   };
 
   return (
-    <div className="main-page">
-      <h1>Main page</h1>
-
-      <div className="content-container">
-        <div className="friends-section">
-          <h2>Friend list</h2>
-          <FriendList onFriendSelect={handleFriendSelect} />
-
-          <h2>Pending requests</h2>
-          <PendingRequests />
+    <div className="main-container">
+      {/* Sidebar View */}
+      <aside
+        className={`sidebar ${
+          isMobile && groupId ? 'hidden' : ''
+        }`}
+      >
+        <div className="sidebar-content">
+          {view === 'friends' ? (
+            <FriendList onFriendSelect={handleFriendSelect} />
+          ) : (
+            <PendingRequests />
+          )}
         </div>
-
-        <div className="chat-placeholder">
-          Select a friend to start chatting
+        <div className="sidebar-tabs">
+          <button
+            className={`tab-button ${view === 'friends' ? 'active' : ''}`}
+            onClick={() => setView('friends')}
+            title="Друзья"
+          >
+            👥
+          </button>
+          <button
+            className={`tab-button ${view === 'requests' ? 'active' : ''}`}
+            onClick={() => setView('requests')}
+            title="Заявки"
+          >
+            📨
+          </button>
         </div>
-      </div>
+      </aside>
+
+      {/* Chat View */}
+      <main
+        className={`main-content ${
+          isMobile && !groupId ? 'hidden' : ''
+        }`}
+      >
+        {!groupId && (
+          <div className="chat-placeholder">
+            Выберите пользователя для начала чата
+          </div>
+        )}
+
+        <Outlet />
+      </main>
     </div>
   );
 };

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatWindow from '../../components/Friends/ChatWindow';
 import VideoRoom from '../../components/VideoRoom/VideoRoom';
+import BackButton from '../../components/UI/BackButton';
 import { axiosInstance } from "../../api/api.config";
 import { useCallStore } from '../../store/CallStore';
+import useIsMobile from '../../hooks/Mobile/useIsMobile';
 
 const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const { groupId } = useParams();
@@ -11,8 +13,12 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const [centToken, setCentToken] = useState<string | null>(null);
   const [channels, setChannels] = useState<{ room: string; group_messages: string; user: string } | null>(null);
   const [loading, setLoading] = useState(true);
-
   const activeRoomId = useCallStore((state) => state.activeRoomId);
+
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  const handleBack = () => navigate('/');
 
   if (!groupId) {
     return <div>Неверный или отсутствующий идентификатор группы</div>;
@@ -53,14 +59,17 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <ChatWindow 
-        groupId={Number(groupId)} 
-        centrifugoUrl={centrifugoUrl}
-        centToken={centToken}
-        channels={{ room: channels.room, user: channels.user, group_messages: channels.group_messages }}
-      />
-      <button onClick={handleCallClick} className="call-button">📞 Позвонить</button>
+    <div className="chat-container">
+      <div className="chat-header">
+        {isMobile && (
+          <BackButton />
+        )}
+        <span className="chat-username">Пользователь #{groupId}</span>
+        <button onClick={handleCallClick} className="call-button">
+          📞 Позвонить
+        </button>
+      </div>
+      
       {activeRoomId === groupId.toString() && (
         <VideoRoom
           roomId={activeRoomId}
@@ -69,8 +78,17 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
           channels={{ room: channels.room, user: channels.user }}
         />
       )}
+
+      <div className="chat-body">
+        <ChatWindow 
+          groupId={Number(groupId)} 
+          centrifugoUrl={centrifugoUrl}
+          centToken={centToken}
+          channels={channels}
+        />
+      </div>
     </div>
-  );
+  );  
 };
 
 export default ChatWithVideo;
