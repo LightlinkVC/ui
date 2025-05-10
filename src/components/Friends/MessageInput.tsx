@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import { authStore } from '../../store/AuthStore';
 
+import './MessageInput.css';
+
 type MessageInputProps = {
   groupId: number;
   onNewMessage: (message: any) => void;
@@ -52,9 +54,10 @@ const MessageInput = ({ groupId, onNewMessage }: MessageInputProps) => {
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message..."
+        placeholder="Введите сообщение..."
+        className="input-field"
       />
-      <button type="submit">Send</button>
+      <button type="submit" className="send-button">Отправить</button>
     </form>
   );
 };

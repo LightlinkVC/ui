@@ -3,11 +3,9 @@ import { useState, useEffect } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import { authStore } from "../../store/AuthStore";
 
-type Friendship = {
-  user1_id: number;
-  user2_id: number;
-  status_name: string;
-  action_user_id: number;
+type FriendMeta = {
+  user_id: number;
+  username: string;
 };
 
 type FriendListProps = {
@@ -15,7 +13,7 @@ type FriendListProps = {
 };
 
 const FriendList = ({ onFriendSelect }: FriendListProps) => {
-  const [friends, setFriends] = useState<Friendship[]>([]);
+  const [friends, setFriends] = useState<FriendMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -51,13 +49,12 @@ const FriendList = ({ onFriendSelect }: FriendListProps) => {
     <div className="friend-list">
       {/* ... */}
       <div className="friends-container">
-        {friends.map((friendship, index) => {
+        {friends.map((friendMeta, index) => {
           const currentUserId = authStore.userId;
           if (!currentUserId) return null;
 
-          const friendId = friendship.user1_id === currentUserId 
-            ? friendship.user2_id 
-            : friendship.user1_id;
+          const friendId = friendMeta.user_id
+          const friendUsername = friendMeta.username
 
           return (
             <div 
@@ -67,11 +64,11 @@ const FriendList = ({ onFriendSelect }: FriendListProps) => {
               style={{ cursor: 'pointer' }}
             >
               <div className="friend-info">
-                <span>Friend ID: {friendId}</span>
+                <span>Friend: {friendUsername}</span>
               </div>
-              <div className="friend-status">
-                {getFriendStatus(friendship.status_name)}
-              </div>
+              {/* <div className="friend-status">
+                {getFriendStatus('accepted')}
+              </div> */}
             </div>
           );
         })}

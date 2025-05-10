@@ -21,7 +21,7 @@ const FriendRequest = () => {
 
   return (
     <div className="friend-list">
-      <h2>Send Friend Request</h2>
+      <div>Send Friend Request</div>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { axiosInstance } from "../../api/api.config";
-import { authStore } from "../../store/AuthStore";
 
-type Friendship = {
-  user1_id: number;
-  user2_id: number;
-  status_name: string;
-  action_user_id: number;
+type FriendshipRequest = {
+  user_id: number;
+  username: string;
 };
 
 const PendingRequests = observer(() => {
-  const [pendingRequests, setPendingRequests] = useState<Friendship[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<FriendshipRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -30,33 +27,22 @@ const PendingRequests = observer(() => {
     fetchPendingRequests();
   }, []);
 
-  const handleAcceptRequest = async (senderId: number) => {
+  const handleAcceptRequest = async (userId: number) => {
     try {
-      await axiosInstance.post("/api/accept-friend-request", { receiver_id: senderId });
-
-      setPendingRequests((prev) => prev.filter((req) => req.user1_id !== senderId && req.user2_id !== senderId));
+      await axiosInstance.post("/api/accept-friend-request", { receiver_id: userId });
+      setPendingRequests((prev) => prev.filter((req) => req.user_id !== userId));
     } catch (error) {
       console.error("Error accepting request:", error);
     }
   };
 
-  const handleDeclineRequest = async (senderId: number) => {
+  const handleDeclineRequest = async (userId: number) => {
     try {
-      await axiosInstance.post("/api/decline-friend-request", { receiver_id: senderId });
-
-      setPendingRequests((prev) => prev.filter((req) => req.user1_id !== senderId && req.user2_id !== senderId));
+      await axiosInstance.post("/api/decline-friend-request", { receiver_id: userId });
+      setPendingRequests((prev) => prev.filter((req) => req.user_id !== userId));
     } catch (error) {
       console.error("Error declining request:", error);
     }
-  };
-
-  const getRequesterInfo = (request: Friendship) => {
-    if (!authStore.userId) return "Unknown user";
-
-    const isReceiver = request.user2_id === authStore.userId;
-    const senderId = isReceiver ? request.user1_id : request.user2_id;
-
-    return `User #${senderId} → You (#${authStore.userId})`;
   };
 
   if (loading) return <div>Loading pending requests...</div>;
@@ -64,33 +50,26 @@ const PendingRequests = observer(() => {
 
   return (
     <div className="pending-requests">
-      <h2>Pending Friend Requests</h2>
+      <h3>Pending Friend Requests</h3>
 
       <div className="requests-list">
-        {pendingRequests
-          .filter((request) => request.status_name === "pending")
-          .map((request, index) => {
-            const isReceiver = request.user2_id === authStore.userId;
-            const senderId = isReceiver ? request.user1_id : request.user2_id;
+        {pendingRequests.map((request) => (
+          <div key={request.user_id} className="request-item">
+            <div className="request-info">
+              <span>{request.username}</span>
+              <span className="status-badge">Pending</span>
+            </div>
 
-            return (
-              <div key={index} className="request-item">
-                <div className="request-info">
-                  <span>{getRequesterInfo(request)}</span>
-                  <span className="status-badge">Pending</span>
-                </div>
-
-                  <div className="request-actions">
-                    <button onClick={() => handleAcceptRequest(senderId)} className="accept-btn">
-                      Accept
-                    </button>
-                    <button onClick={() => handleDeclineRequest(senderId)} className="reject-btn">
-                      Decline
-                    </button>
-                  </div>
-              </div>
-            );
-          })}
+            <div className="request-actions">
+              <button onClick={() => handleAcceptRequest(request.user_id)} className="accept-btn">
+                Accept
+              </button>
+              <button onClick={() => handleDeclineRequest(request.user_id)} className="reject-btn">
+                Decline
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

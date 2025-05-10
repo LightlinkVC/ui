@@ -5,6 +5,8 @@ import MessageInput from './MessageInput';
 import { observer } from "mobx-react-lite";
 import { authStore } from '../../store/AuthStore';
 
+import './ChatWindow.css'
+
 type Message = {
   id: string;
   user_id: number;
@@ -135,19 +137,21 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
   return (
     <div className="chat-window">
       <div className="messages-container">
-        {messages.map(message => (
+        {messages.map((message) => (
           <div key={message.id} className="message">
-            <div className="message-header">
-              <span className="user-id">User #{message.user_id}</span>
+            <div className="message-header">User #{message.user_id}</div>
+            <div className="message-content">
+              {message.content} [{message.status}]
             </div>
-            <div className="message-content">`${message.content} [${message.status}]`</div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <MessageInput groupId={groupId} onNewMessage={handleNewMessage} />
+      <div className="input-container">
+        <MessageInput groupId={groupId} onNewMessage={handleNewMessage} />
+      </div>
     </div>
-  );
+  );  
 });
 
 export default ChatWindow;
