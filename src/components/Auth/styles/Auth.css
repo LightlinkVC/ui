@@ -1,0 +1,109 @@
+@font-face {
+    font-family: "Ubuntu-Regular";
+    src: url("../fonts/ofont.ru_Ubuntu.ttf");
+}
+@font-face {
+    font-family: "Ubuntu-Bold";
+    src: url("../fonts/ubuntu-bold_[allfont.ru].ttf");
+}
+
+.content_wrapper {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.login_window {
+  width: 390px;
+  padding: 30px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.form_wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login_header {
+  font-family: "Ubuntu-Bold", sans-serif;
+  font-size: 30px;
+  color: #403866;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form_text_input_wrapper {
+  background: #e6e6e6;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.form_text_input_wrapper:focus-within {
+  background: #d9d9d9;
+}
+
+.form_text_input {
+  width: 100%;
+  height: 62px;
+  padding: 0 20px;
+  border: none;
+  background: transparent;
+  font-family: "Ubuntu-Bold", sans-serif;
+  font-size: 16px;
+  color: #403866;
+  outline: none;
+}
+
+.form_text_input::placeholder {
+  color: #666;
+  opacity: 0.7;
+}
+
+.login_button {
+  width: 100%;
+  height: 62px;
+  background: #827ffe;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-family: "Ubuntu-Bold", sans-serif;
+  font-size: 16px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login_button:hover {
+  background: #6b68d1;
+}
+
+.error_message {
+  color: #e74c3c;
+  font-family: "Ubuntu-Regular", sans-serif;
+  font-size: 14px;
+  text-align: center;
+  margin-top: -10px;
+}
+
+@media (max-width: 480px) {
+  .login_window {
+    width: 90%;
+    padding: 20px;
+  }
+  
+  .form_text_input {
+    height: 50px;
+    font-size: 14px;
+  }
+  
+  .login_button {
+    height: 50px;
+    font-size: 14px;
+  }
+}
