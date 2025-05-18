@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { axiosInstance } from "../../api/api.config";
+import './PendingRequests.css';
 
 type FriendshipRequest = {
   user_id: number;
@@ -50,21 +51,24 @@ const PendingRequests = observer(() => {
 
   return (
     <div className="pending-requests">
-      <h3>Pending Friend Requests</h3>
-
       <div className="requests-list">
         {pendingRequests.map((request) => (
           <div key={request.user_id} className="request-item">
             <div className="request-info">
-              <span>{request.username}</span>
+              <span className="username">{request.username}</span>
               <span className="status-badge">Pending</span>
             </div>
-
             <div className="request-actions">
-              <button onClick={() => handleAcceptRequest(request.user_id)} className="accept-btn">
+              <button 
+                onClick={() => handleAcceptRequest(request.user_id)} 
+                className="accept-btn"
+              >
                 Accept
               </button>
-              <button onClick={() => handleDeclineRequest(request.user_id)} className="reject-btn">
+              <button 
+                onClick={() => handleDeclineRequest(request.user_id)} 
+                className="reject-btn"
+              >
                 Decline
               </button>
             </div>
