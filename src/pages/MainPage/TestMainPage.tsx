@@ -1,19 +1,23 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, Outlet, useParams, useLocation } from 'react-router-dom';
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
 import { axiosInstance } from "../../api/api.config";
-import { Outlet, useParams } from 'react-router-dom';
 import useIsMobile from '../../hooks/Mobile/useIsMobile';
-
+import BackButton from '../../components/UI/BackButton/HomeButton';
+import AddFriendButton from '../../components/UI/AddFriendButton/AddFriendButton';
 import './TestMainPage.css';
 
 const TestMainPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { groupId } = useParams();
-
-  const [view, setView] = useState<'friends' | 'requests'>('friends');
+  const location = useLocation();
   const isMobile = useIsMobile();
+  
+  const [view, setView] = useState<'friends' | 'requests'>('friends');
+
+  // Проверяем, находимся ли мы на странице добавления друзей
+  const isAddFriendsPage = location.pathname.includes('/add-friend');
 
   const handleFriendSelect = async (friendId: number) => {
     try {
@@ -30,46 +34,50 @@ const TestMainPage = () => {
       {/* Sidebar View */}
       <aside
         className={`sidebar ${
-          isMobile && groupId ? 'hidden' : ''
+          (isMobile && (groupId || isAddFriendsPage)) ? 'hidden' : ''
         }`}
       >
         <div className="sidebar-content">
           {view === 'friends' ? (
-            <FriendList onFriendSelect={handleFriendSelect} />
+            <>
+              <AddFriendButton />
+              <FriendList onFriendSelect={handleFriendSelect} />
+            </>
           ) : (
             <PendingRequests />
           )}
-        </div>
-        <div className="sidebar-tabs">
-          <button
-            className={`tab-button ${view === 'friends' ? 'active' : ''}`}
-            onClick={() => setView('friends')}
-            title="Друзья"
-          >
-            👥
-          </button>
-          <button
-            className={`tab-button ${view === 'requests' ? 'active' : ''}`}
-            onClick={() => setView('requests')}
-            title="Заявки"
-          >
-            📨
-          </button>
+
+          <div className="sidebar-tabs">
+            <button
+              className={`tab-button ${view === 'friends' ? 'active' : ''}`}
+              onClick={() => setView('friends')}
+              title="Друзья"
+            >
+              👥
+            </button>
+            <button
+              className={`tab-button ${view === 'requests' ? 'active' : ''}`}
+              onClick={() => setView('requests')}
+              title="Заявки"
+            >
+              📨
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* Chat View */}
+      {/* Основной контент */}
       <main
         className={`main-content ${
-          isMobile && !groupId ? 'hidden' : ''
+          isMobile && !groupId && !isAddFriendsPage ? 'hidden' : ''
         }`}
       >
-        {!groupId && (
-          <div className="chat-placeholder">
-            Выберите пользователя для начала чата
+        {isMobile && isAddFriendsPage && (
+          <div className="mobile-home-button-wrapper">
+            <BackButton />
           </div>
         )}
-
+        
         <Outlet />
       </main>
     </div>

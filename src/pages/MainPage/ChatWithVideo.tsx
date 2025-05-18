@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ChatWindow from '../../components/Friends/ChatWindow';
 import VideoRoom from '../../components/VideoRoom/VideoRoom';
-import BackButton from '../../components/UI/BackButton';
+import BackButton from '../../components/UI/BackButton/HomeButton';
 import { axiosInstance } from "../../api/api.config";
 import { useCallStore } from '../../store/CallStore';
 import useIsMobile from '../../hooks/Mobile/useIsMobile';
+import './ChatWithVideo.css'
 
 const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const { groupId } = useParams();
@@ -16,9 +17,6 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const activeRoomId = useCallStore((state) => state.activeRoomId);
 
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
-
-  const handleBack = () => navigate('/');
 
   if (!groupId) {
     return <div>Неверный или отсутствующий идентификатор группы</div>;
@@ -60,32 +58,36 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">
-        {isMobile && (
-          <BackButton />
+      <div className='chat-inner'>
+        <div className="chat-header">
+          {isMobile && (
+            <BackButton />
+          )}
+          <span className="chat-username">Пользователь #{groupId}</span>
+          <button onClick={handleCallClick} className="call-button">
+            <svg className="call-icon" width="20" height="20" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+          </button>
+        </div>
+        
+        {activeRoomId === groupId.toString() && (
+          <VideoRoom
+            roomId={activeRoomId}
+            centrifugoUrl={centrifugoUrl}
+            centToken={centToken}
+            channels={{ room: channels.room, user: channels.user }}
+          />
         )}
-        <span className="chat-username">Пользователь #{groupId}</span>
-        <button onClick={handleCallClick} className="call-button">
-          📞 Позвонить
-        </button>
-      </div>
-      
-      {activeRoomId === groupId.toString() && (
-        <VideoRoom
-          roomId={activeRoomId}
-          centrifugoUrl={centrifugoUrl}
-          centToken={centToken}
-          channels={{ room: channels.room, user: channels.user }}
-        />
-      )}
 
-      <div className="chat-body">
-        <ChatWindow 
-          groupId={Number(groupId)} 
-          centrifugoUrl={centrifugoUrl}
-          centToken={centToken}
-          channels={channels}
-        />
+        <div className="chat-body">
+          <ChatWindow 
+            groupId={Number(groupId)} 
+            centrifugoUrl={centrifugoUrl}
+            centToken={centToken}
+            channels={channels}
+          />
+        </div>
       </div>
     </div>
   );  

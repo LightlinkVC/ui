@@ -4,15 +4,16 @@ import { axiosInstance } from "../../api/api.config";
 import MessageInput from './MessageInput';
 import { observer } from "mobx-react-lite";
 import { authStore } from '../../store/AuthStore';
-
+import FormatTimestamp from './utils/DateFormatter'
 import './ChatWindow.css'
 
 type Message = {
-  id: string;
+  id: number;
   user_id: number;
   group_id: number;
   status: string;
   content: string;
+  created_at: string;
 };
 
 type ChatWindowProps = {
@@ -22,24 +23,19 @@ type ChatWindowProps = {
   channels: { room: string; user: string; group_messages: string };
 };
 
-/*
-  TODO
-
-  1. Обрабатывать ровно одну подписку.
-  2. Убрать ненужное колбэк для добавления сообщений.
-*/
-
 const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const centrifugeRef = useRef<Centrifuge | null>(null);
+  const [revealedMessages, setRevealedMessages] = useState<number[]>([]);
 
   useEffect(() => {
     const loadMessages = async () => {
       try {
         const response = await axiosInstance.get(`/api/messages/${groupId}`);
+        console.log(response)
         setMessages(response.data);
         setLoading(false);
       } catch (err) {
@@ -52,17 +48,17 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
     }, [groupId]);
 
   useEffect(() => {
-      const startProcess = async () => {
-        if (!centToken || !channels || !authStore.userId) return;
+    const startProcess = async () => {
+      if (!centToken || !channels || !authStore.userId) return;
+
+      // initTraceWsConnection()
   
-        // initTraceWsConnection()
-    
-        initCentrifugeSubscriptions();
-        console.log("Subscribed to centrifugo");
-      };
-    
-      startProcess();
-    }, [centToken]);
+      initCentrifugeSubscriptions();
+      console.log("Subscribed to centrifugo");
+    };
+  
+    startProcess();
+  }, [centToken]);
 
   useEffect(() => {
     scrollToBottom();
@@ -103,7 +99,7 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
           handleNewMessage(msg.payload);
         break;
       case "hateUpdate":
-        console.log(msg.payload)
+        handleUpdateMessageStatus(msg.payload.id, 'hate');
         break;
       default:
         console.log("Неизвестное сообщение", msg);
@@ -131,24 +127,54 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
     };
   }
 
+  const handleUpdateMessageStatus = (messageId: number, newStatus: string) => {
+    setMessages(prevMessages =>
+      prevMessages.map(message => 
+        message.id === messageId ? { ...message, status: newStatus } : message
+      )
+    );
+  };
+
+  const handleMessageClick = (messageId: number) => {
+    if (!revealedMessages.includes(messageId)) {
+      setRevealedMessages(prev => [...prev, messageId]);
+    }
+  };
+
   if (loading) return <div>Loading messages...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className="chat-window">
       <div className="messages-container">
-        {messages.map((message) => (
-          <div key={message.id} className="message">
-            <div className="message-header">User #{message.user_id}</div>
-            <div className="message-content">
-              {message.content} [{message.status}]
+        {messages.map((message) => {
+          const isHate = message.status === 'hate';
+          const isRevealed = revealedMessages.includes(message.id);
+          const isOwn = message.user_id === authStore.userId;
+
+          return (
+            <div 
+              key={message.id} 
+              className={`message ${isOwn ? 'own' : ''}`}
+              onClick={isHate ? () => handleMessageClick(message.id) : undefined}
+              style={{ cursor: isHate ? 'pointer' : 'default' }}
+            >
+              <div className="message-header">
+                <div className="message-user">User #{message.user_id}</div>
+                <div className="message-time">
+                  {FormatTimestamp(new Date(message.created_at))}
+                </div>
+              </div>
+              <div className={`message-content ${isHate && !isRevealed ? 'blurred' : ''}`}>
+                {message.content}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
       <div className="input-container">
-        <MessageInput groupId={groupId} onNewMessage={handleNewMessage} />
+        <MessageInput groupId={groupId} lastId={messages.length > 0 ? messages[messages.length - 1].id : -1} onNewMessage={handleNewMessage} />
       </div>
     </div>
   );  

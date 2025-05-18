@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import { authStore } from '../../store/AuthStore';
-
 import './MessageInput.css';
 
 type MessageInputProps = {
   groupId: number;
+  lastId: number,
   onNewMessage: (message: any) => void;
 };
 
-const MessageInput = ({ groupId, onNewMessage }: MessageInputProps) => {
+const MessageInput = ({ groupId, lastId, onNewMessage }: MessageInputProps) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,29 +19,29 @@ const MessageInput = ({ groupId, onNewMessage }: MessageInputProps) => {
     try {
       const userId = authStore.userId;
 
+      const tempDate = new Date();
+
       const newMessage = {
-        user_id: userId, // Подставьте реальный user_id
+        user_id: userId,
         group_id: groupId,
         content: message,
-        id: 'temp-id', // Уникальный временный ID
+        created_at: tempDate.toISOString(),
+        id: lastId + 1,
+        status: 'pending',
       };
 
-      // Отправляем сообщение на сервер
       const response = await axiosInstance.post('/api/messages', {
         group_id: groupId,
         content: message,
       });
 
-      // Если сервер возвращает данные о сообщении, обновляем состояние с реальным id
       const messageWithId = {
         ...newMessage,
         id: response.data.id || newMessage.id,
       };
 
-      // Обновляем сообщения с новым сообщением
       onNewMessage(messageWithId);
 
-      // Очищаем поле ввода
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -57,7 +57,20 @@ const MessageInput = ({ groupId, onNewMessage }: MessageInputProps) => {
         placeholder="Введите сообщение..."
         className="input-field"
       />
-      <button type="submit" className="send-button">Отправить</button>
+      <button type="submit" className="send-button">
+        <svg 
+          className="send-icon" 
+          width="20" 
+          height="20" 
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path 
+            d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" 
+            fill="currentColor"
+          />
+        </svg>
+      </button>
     </form>
   );
 };
