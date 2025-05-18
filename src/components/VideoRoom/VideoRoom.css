@@ -1,5 +1,10 @@
 .video-room-container {
+  background-color: green;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #2a2a33;
   height: 50%;
+  position: relative;
 }
 
 .video-grid {
@@ -33,7 +38,7 @@
 
 .controls {
   position: absolute;
-  bottom: 30px;
+  bottom: 9px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -43,6 +48,14 @@
   padding: 15px 25px;
   border-radius: 50px;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.controls.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(100%);
 }
 
 .control-btn {
@@ -109,5 +122,43 @@
 @media (max-width: 480px) {
   .have_no_acc_text {
     font-size: 12px;
+  }
+
+  .controls {
+    justify-content: space-around;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .control-btn {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .control-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .have_no_acc_text {
+    font-size: 12px;
+  }
+
+  .controls {
+    justify-content: space-around;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .control-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .control-btn svg {
+    width: 24px;
+    height: 24px;
   }
 }

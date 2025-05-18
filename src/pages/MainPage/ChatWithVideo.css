@@ -1,5 +1,42 @@
-  /* Back button for mobile chat view */
-  .back-button {
+.chat-container {
+    padding: 8px;
+    border-radius: 10px;
+    background-color: #2f3136;
+    box-shadow: 
+    inset 0 0 4px rgba(0, 0, 0, 0.6),
+    inset 0 0 2px rgba(255, 255, 255, 0.05);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-inner {
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+}
+
+.chat-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #2f3136;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chat-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #2f3136;
+}
+
+.back-button {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -8,26 +45,47 @@
     font-size: 18px;
     cursor: pointer;
     color: #333;
-  }
+}
 
-  .chat-container {
+.chat-username {
+    color: white;
+    font-weight: 600;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-  }
-  
-  .chat-header {
-    padding: 10px;
-    background-color: #f5f5f5;
+    justify-content: center;
+}
+
+.call-button {
+    background-color: #5865f2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-  }
-  
-  .chat-body {
-    flex: 1;
-    overflow: auto;
-    padding: 10px;
-    background: white;
-  }
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-family: 'Ubuntu-Medium', sans-serif;
+}
+
+.call-button:hover {
+    background-color: #4752c4;
+    transform: translateY(-1px);
+}
+
+.call-button:active {
+    background-color: #3c45a5;
+    transform: translateY(0);
+}
+
+.call-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+}
+
+.call-button:hover .call-icon {
+    transform: rotate(-10deg) scale(1.1);
+}
   

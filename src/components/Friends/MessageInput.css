@@ -1,43 +1,82 @@
-/* MessageInput.css */
 .message-input {
     display: flex;
-    padding: 0.5rem;
-    background-color: #fff;
-    gap: 0.5rem;
-  }
+    padding: 8px;
+    /* background-color: #40444b; */
+    gap: 12px;
+    border-radius: 8px;
+    /* border: 1px solid #202225; */
+}
   
-  .input-field {
+.input-field {
     flex: 1;
-    padding: 0.6rem 1rem;
-    border: 1px solid #cbd5e0;
-    border-radius: 999px;
-    font-size: 0.95rem;
+    padding: 12px 16px;
+    background-color: #36393f;
+    border: 1px solid #202225;
+    border-radius: 8px;
+    color: #dcddde;
+    font-family: 'Ubuntu-Regular', sans-serif;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.input-field::placeholder {
+    color: #72767d;
+}
+
+.input-field:focus {
+    border-color: #5865f2;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
     outline: none;
-    transition: border 0.2s, box-shadow 0.2s;
-  }
+}
   
-  .input-field:focus {
-    border-color: #4299e1;
-    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.4);
-  }
-  
-  .send-button {
-    background-color: #4299e1;
+.send-button {
+    background-color: #5865f2;
     color: white;
     border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 999px;
+    padding: 10px 20px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-  }
-  
-  .send-button:hover {
-    background-color: #3182ce;
-  }
-  
-  .send-button:disabled {
-    background-color: #90cdf4;
-    cursor: not-allowed;
-  }
-  
+    font-family: 'Ubuntu-Medium', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.send-button:hover {
+    background-color: #4752c4;
+    transform: translateY(-1px);
+}
+
+.send-button:active {
+    transform: translateY(0);
+    background-color: #3c45a5;
+}
+
+.send-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.send-button:hover .send-icon {
+    transform: translateX(2px);
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .message-input {
+        padding: 6px;
+        gap: 8px;
+    }
+    
+    .input-field {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .send-button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
