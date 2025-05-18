@@ -14,10 +14,9 @@ function App() {
         <Route path="/" element={<Layout />} >
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
-          <Route path="add-friend" element={<FriendRequestPage />} />
-
-          {/* Главная страница с вложенным чатом */}
+          
           <Route path="/" element={<TestMainPage />}>
+            <Route path="add-friend" element={<FriendRequestPage />} />
             <Route path="chat/:groupId" element={
               <ChatWithVideo centrifugoUrl="ws://localhost:8000/connection/websocket" />
             } />
