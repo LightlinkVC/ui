@@ -27,13 +27,32 @@
   font-size: calc(10px + 1vw);
   aspect-ratio: 4/3;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .video-element {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Или 'contain', в зависимости от предпочтений */
+  object-fit: contain;
   border-radius: 8px;
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  background-color: #aeb3b7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
 }
 
 .controls {
@@ -93,6 +112,37 @@
   width: 24px;
   height: 24px;
   fill: currentColor;
+  display: block;
+}
+
+.control-btn.muted {
+  background: #dc3545 !important; /* Красный цвет при муте */
+}
+
+.control-btn.muted:hover {
+  background: #c82333 !important;
+}
+
+.control-btn.muted svg {
+  position: relative;
+}
+
+.control-btn.muted svg path:nth-child(2) {
+  stroke: white;
+}
+
+.control-btn.muted svg line {
+  stroke: white !important;
+}
+
+/* Опционально: добавить анимацию линии */
+.control-btn.muted svg line {
+  animation: strike 0.3s ease-out;
+}
+
+@keyframes strike {
+  from { stroke-dasharray: 0 100%; }
+  to { stroke-dasharray: 100% 0; }
 }
 
 .have_no_acc_wrapper {
