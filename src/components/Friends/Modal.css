@@ -1,0 +1,230 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-container {
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-content {
+  position: relative;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.modal-close-button:hover {
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  background: #1f1f2f;
+  border: 1px solid #2d2d3d;
+  color: #ffffff;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 3px;
+  width: 100%;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #5865f2;
+  outline: none;
+}
+
+.friends-list {
+  background: #252538;
+  border-radius: 6px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.friends-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.friends-list::-webkit-scrollbar-track {
+  background: #1f1f2f;
+}
+
+.friends-list::-webkit-scrollbar-thumb {
+  background: #3a3a4f;
+  border-radius: 3px;
+}
+
+.friends-list::-webkit-scrollbar-thumb:hover {
+  background: #4a4a5f;
+}
+
+.create-group-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #2a2a3f;
+  color: #dcddde;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.create-group-modal h2 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.create-group-modal h3 {
+  padding-top: 6px;
+}
+
+.friend-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.friend-item:hover {
+  background: #222232;
+}
+
+.friend-item label {
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #72767d;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background: #5865f2;
+  border-color: #5865f2;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+}
+
+select {
+  background-color: #40444b;
+  color: #dcddde;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 28px 6px 10px;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dcddde'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+select:hover {
+  background-color: #4f545c;
+}
+
+.modal-actions {
+  gap: 10px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.modal-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 3px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions button[disabled] {
+  background: #4f545c;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modal-actions button:first-child {
+  background-color: #5865f2;
+  color: white;
+}
+
+.modal-actions button:first-child:hover {
+  background-color: #4752c4;
+}
+
+.modal-actions button:last-child {
+  background-color: #4f545c;
+  color: #dcddde;
+}
+
+.modal-actions button:last-child:hover {
+  background-color: #686d73;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95%;
+    padding: 1rem;
+  }
+}

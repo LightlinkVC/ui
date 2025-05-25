@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link, Outlet, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, Outlet, useParams, useLocation } from 'react-router-dom';
 import FriendList from '../../components/Friends/FriendList';
 import PendingRequests from '../../components/Friends/PendingRequests';
+import GroupList from '../../components/Friends/GroupList';
 import { axiosInstance } from "../../api/api.config";
 import useIsMobile from '../../hooks/Mobile/useIsMobile';
 import BackButton from '../../components/UI/BackButton/HomeButton';
 import AddFriendButton from '../../components/UI/AddFriendButton/AddFriendButton';
+import { Users, Bell, Home } from 'lucide-react';
 import './TestMainPage.css';
 
 const TestMainPage = () => {
@@ -14,9 +16,8 @@ const TestMainPage = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  const [view, setView] = useState<'friends' | 'requests'>('friends');
+  const [view, setView] = useState<'friends' | 'requests' | 'groups'>('friends');
 
-  // Проверяем, находимся ли мы на странице добавления друзей
   const isAddFriendsPage = location.pathname.includes('/add-friend');
 
   const handleFriendSelect = async (friendId: number) => {
@@ -29,6 +30,10 @@ const TestMainPage = () => {
     }
   };
 
+  const handleGroupSelect = (groupId: number) => {
+    navigate(`/chat/${groupId}`);
+  };
+
   return (
     <div className="main-container">
       {/* Sidebar View */}
@@ -38,13 +43,15 @@ const TestMainPage = () => {
         }`}
       >
         <div className="sidebar-content">
-          {view === 'friends' ? (
+          {view === 'friends' && (
             <>
               <AddFriendButton />
               <FriendList onFriendSelect={handleFriendSelect} />
             </>
-          ) : (
-            <PendingRequests />
+          )}
+          {view === 'requests' && <PendingRequests />}
+          {view === 'groups' && (
+            <GroupList onGroupSelect={handleGroupSelect} />
           )}
 
           <div className="sidebar-tabs">
@@ -53,14 +60,21 @@ const TestMainPage = () => {
               onClick={() => setView('friends')}
               title="Друзья"
             >
-              👥
+              <Users size={24} />
             </button>
             <button
               className={`tab-button ${view === 'requests' ? 'active' : ''}`}
               onClick={() => setView('requests')}
               title="Заявки"
             >
-              📨
+              <Bell size={24} />
+            </button>
+            <button
+              className={`tab-button ${view === 'groups' ? 'active' : ''}`}
+              onClick={() => setView('groups')}
+              title="Группы"
+            >
+              <Home size={24} />
             </button>
           </div>
         </div>

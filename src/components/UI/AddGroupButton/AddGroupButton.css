@@ -1,0 +1,55 @@
+.add-group-wrapper {
+  padding: 16px;
+  border-bottom: 1px solid #2d2d3d;
+  flex-shrink: 0;
+}
+
+.add-group-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 220px;
+  padding: 10px 16px;
+  background-color: #5865f2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Ubuntu-Medium', sans-serif;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+}
+
+.add-group-button:hover {
+  background-color: #4752c4;
+  transform: translateY(-1px);
+}
+
+.add-group-button:active {
+  transform: translateY(0);
+}
+
+.add-group-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+@media (max-width: 480px) {
+  .add-group-button {
+    max-width: 100%;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .add-group-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
