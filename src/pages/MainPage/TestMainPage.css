@@ -19,15 +19,19 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    position: relative;
   }
   
   /* Tabs at bottom */
   .sidebar-tabs {
+    width: 100%;
+    position: absolute;
     display: flex;
     justify-content: space-around;
     background-color: #2a2a3f;
     padding: 10px;
     border-top: 1px solid #3a3a4f;
+    bottom: 0;
   }
   
   .tab-button {
@@ -48,7 +52,7 @@
   /* Main content (chat) */
 .main-content {
     flex: 1;
-    background-color: #36393f; /* Discord-like background */
+    background-color: #36393f;
     padding: 20px;
     overflow-y: auto;
     position: relative;

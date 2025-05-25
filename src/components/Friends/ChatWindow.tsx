@@ -7,13 +7,22 @@ import { authStore } from '../../store/AuthStore';
 import FormatTimestamp from './utils/DateFormatter'
 import './ChatWindow.css'
 
+type FileData = {
+  name: string;
+  type: string;
+  url: string;
+  status: string;
+};
+
 type Message = {
   id: number;
+  isTemp: boolean;
   user_id: number;
   group_id: number;
   status: string;
   content: string;
   created_at: string;
+  files?: FileData[];
 };
 
 type ChatWindowProps = {
@@ -36,7 +45,8 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
       try {
         const response = await axiosInstance.get(`/api/messages/${groupId}`);
         console.log(response)
-        setMessages(response.data);
+        const data = Array.isArray(response.data) ? response.data : [];
+        setMessages(data);
         setLoading(false);
       } catch (err) {
         setError('Failed to load messages');
@@ -60,17 +70,61 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
     startProcess();
   }, [centToken]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    const images = Array.from(document.querySelectorAll('.message-image')) as HTMLImageElement[];
+
+    if (images.length === 0) {
+      scrollToBottom();
+      return;
+    }
+
+    let loadedCount = 0;
+
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount === images.length) {
+        scrollToBottom();
+      }
+    };
+
+    images.forEach((img) => {
+      if (img.complete) {
+        checkAllLoaded();
+      } else {
+        img.addEventListener('load', checkAllLoaded);
+        img.addEventListener('error', checkAllLoaded);
+      }
+    });
+
+    return () => {
+      images.forEach((img) => {
+        img.removeEventListener('load', checkAllLoaded);
+        img.removeEventListener('error', checkAllLoaded);
+      });
+    };
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+const handleNewMessage = (newMessage: Message) => {
+  setMessages(prev => {
+    if (!Array.isArray(prev)) return [newMessage];
+    
+    const existingIndex = prev.findIndex(m => 
+      m.isTemp ? m.id === newMessage.id : m.id === newMessage.id
+    );
 
-  const handleNewMessage = (newMessage: Message) => {
-    setMessages(prev => [...prev, newMessage]);
-  };
+    if (existingIndex > -1) {
+      const newArray = [...prev];
+      newArray[existingIndex] = newMessage;
+      return newArray;
+    }
+    
+    return [...prev, newMessage];
+  });
+};
 
   const initCentrifugeSubscriptions = () => {
     if (!centToken || !channels) return;
@@ -95,8 +149,12 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
     console.log("Обработка сообщения:", msg);
     switch (msg.type) {
       case "newMessage":
-        if (authStore.userId && msg.payload.user_id != authStore.userId)
-          handleNewMessage(msg.payload);
+        if (authStore.userId && msg.payload.user_id !== authStore.userId) {
+          handleNewMessage({
+            ...msg.payload,
+            isTemp: false
+          });
+        }
         break;
       case "hateUpdate":
         handleUpdateMessageStatus(msg.payload.id, 'hate');
@@ -147,7 +205,7 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
   return (
     <div className="chat-window">
       <div className="messages-container">
-        {messages.map((message) => {
+        {messages?.map((message) => {
           const isHate = message.status === 'hate';
           const isRevealed = revealedMessages.includes(message.id);
           const isOwn = message.user_id === authStore.userId;
@@ -165,19 +223,56 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
                   {FormatTimestamp(new Date(message.created_at))}
                 </div>
               </div>
-              <div className={`message-content ${isHate && !isRevealed ? 'blurred' : ''}`}>
-                {message.content}
-              </div>
+              {message.content && (
+                <div className={`message-content ${isHate && !isRevealed ? 'blurred' : ''}`}>
+                  {message.content}
+                </div>
+              )}
+              {message.files && message.files.length > 0 && (
+                <div className="message-files">
+                  {message.files.map((file, index) => (
+                    <div key={`${message.id}-${index}`} className="file-container">
+                      {file.type.startsWith('image/') ? (
+                        <img 
+                          src={file.url} 
+                          alt={file.name}
+                          className="message-image"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(file.url, '_blank');
+                          }}
+                        />
+                      ) : (
+                        <a
+                          href={file.url}
+                          download={file.name}
+                          className="file-download"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          📎 {file.name}
+                        </a>
+                      )}
+                      {file.status === 'uploading' && (
+                        <div className="upload-status">Uploading...</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
         <div ref={messagesEndRef} />
       </div>
-      <div className="input-container">
-        <MessageInput groupId={groupId} lastId={messages.length > 0 ? messages[messages.length - 1].id : -1} onNewMessage={handleNewMessage} />
+      <div className="input-wrapper">
+        <MessageInput 
+          groupId={groupId} 
+          lastId={messages.length > 0 ? messages[messages.length - 1].id : -1} 
+          onNewMessage={handleNewMessage} 
+        />
       </div>
     </div>
-  );  
+  );
 });
 
 export default ChatWindow;
