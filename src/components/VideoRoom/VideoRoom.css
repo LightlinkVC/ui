@@ -1,0 +1,214 @@
+.video-room-container {
+  background-color: green;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #2a2a33;
+  height: 50%;
+  position: relative;
+}
+
+.video-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 15px;
+  justify-content: center;
+  align-content: center;
+  padding: 10px;
+}
+
+.video-tile {
+  background: #2d2d2d;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: calc(10px + 1vw);
+  aspect-ratio: 4/3;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  background-color: #aeb3b7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.controls {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
+  background: rgba(0,0,0,0.7);
+  padding: 15px 25px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.controls.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(100%);
+}
+
+.control-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  background: #444;
+  transform: scale(1.1);
+}
+
+.control-btn.active {
+  background: #007bff;
+}
+
+.control-btn.danger {
+  background: #dc3545;
+}
+
+.control-btn.danger:hover {
+  background: #c82333;
+}
+
+.control-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  display: block;
+}
+
+.control-btn.muted {
+  background: #dc3545 !important; /* Красный цвет при муте */
+}
+
+.control-btn.muted:hover {
+  background: #c82333 !important;
+}
+
+.control-btn.muted svg {
+  position: relative;
+}
+
+.control-btn.muted svg path:nth-child(2) {
+  stroke: white;
+}
+
+.control-btn.muted svg line {
+  stroke: white !important;
+}
+
+/* Опционально: добавить анимацию линии */
+.control-btn.muted svg line {
+  animation: strike 0.3s ease-out;
+}
+
+@keyframes strike {
+  from { stroke-dasharray: 0 100%; }
+  to { stroke-dasharray: 100% 0; }
+}
+
+.have_no_acc_wrapper {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.have_no_acc_text {
+  font-family: "Ubuntu-Regular", sans-serif;
+  color: #666;
+  font-size: 14px;
+}
+
+.signup_link {
+  color: #827ffe;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-left: 5px;
+}
+
+.signup_link:hover {
+  color: #6b68d1;
+}
+
+/* Для мобилок */
+@media (max-width: 480px) {
+  .have_no_acc_text {
+    font-size: 12px;
+  }
+
+  .controls {
+    justify-content: space-around;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .control-btn {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .control-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .have_no_acc_text {
+    font-size: 12px;
+  }
+
+  .controls {
+    justify-content: space-around;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .control-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .control-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}

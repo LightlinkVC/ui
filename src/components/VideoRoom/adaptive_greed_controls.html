@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom-like Adaptive Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #1a1a1a;
+            padding: 20px;
+        }
+
+        .grid-container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            gap: 15px;
+            justify-content: center;
+            align-content: center;
+            padding: 10px;
+        }
+
+        .tile {
+            background: #2d2d2d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: calc(10px + 1vw);
+            aspect-ratio: 4/3;
+            transition: all 0.3s ease;
+        }
+    </style>
+
+    <style>
+        /* Previous styles remain */
+        
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #444;
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #007bff;
+        }
+
+        .control-btn.danger {
+            background: #dc3545;
+        }
+
+        .control-btn.danger:hover {
+            background: #c82333;
+        }
+
+        /* Add icon styles */
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="tile">Tile 1</div>
+        <div class="tile">Tile 2</div>
+        <div class="tile">Tile 3</div>
+        <div class="tile">Tile 4</div>
+        <div class="tile">Tile 5</div>
+        <div class="tile">Tile 6</div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="micToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93c-3.94-.49-7-3.85-7-7.93h2c0 3.31 2.69 6 6 6s6-2.69 6-6h2c0 4.08-3.06 7.44-7 7.93V19h4v2H8v-2h4v-3.07z"/>
+            </svg>
+        </button>
+        
+        <button class="control-btn" id="audioToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+        </button>
+        
+        <button class="control-btn" id="screenShare">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1h-3zm-7-3.53v-2.19c-1.78.37-3.2 1.68-3.75 3.27 1.14.55 2.33.93 3.58 1.11L16 13.5V11h1v2.47l3.07 1.53-.56.93-2.51-1.26z"/>
+            </svg>
+        </button>
+        
+        <button class="control-btn danger" id="leaveCall">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0-7c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1s1-.45 1-1v-1c0-.55-.45-1-1-1zm-4.66-2.95l-.71.71c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l.71-.71c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0zM5.64 5.64l.71.71c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zm12.02 0c.39-.39.39-1.02 0-1.41l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l.71.71c.39.39 1.02.39 1.41 0zm2.34 10.34l-.71-.71c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l.71.71c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        function calculateGrid() {
+            const container = document.querySelector('.grid-container');
+            const tiles = document.querySelectorAll('.tile');
+            const gap = 15; // Совпадает с gap в CSS
+            
+            // Получаем размеры контейнера с учетом padding
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            
+            const tileCount = tiles.length;
+            let bestLayout = { cols: 1, rows: 1 };
+            
+            // Находим оптимальное количество колонок и рядов
+            for (let cols = 1; cols <= tileCount; cols++) {
+                const rows = Math.ceil(tileCount / cols);
+                
+                // Рассчитываем размеры плитки
+                const tileWidth = (containerWidth - (cols - 1) * gap) / cols;
+                const tileHeight = (containerHeight - (rows - 1) * gap) / rows;
+                
+                // Проверяем соотношение сторон
+                const aspectRatio = tileWidth / tileHeight;
+                const targetRatio = 4/3;
+                
+                // Вычисляем реальный размер с учетом соотношения
+                let width, height;
+                if (aspectRatio > targetRatio) {
+                    height = tileHeight;
+                    width = height * targetRatio;
+                } else {
+                    width = tileWidth;
+                    height = width / targetRatio;
+                }
+                
+                // Если все плитки помещаются - сохраняем лучший вариант
+                if (width * cols + gap * (cols - 1) <= containerWidth &&
+                    height * rows + gap * (rows - 1) <= containerHeight) {
+                    if (width * height > (bestLayout.width || 0) * (bestLayout.height || 0)) {
+                        bestLayout = { cols, rows, width, height };
+                    }
+                }
+            }
+            
+            // Применяем лучший вариант
+            container.style.gridTemplateColumns = `repeat(${bestLayout.cols}, ${bestLayout.width}px)`;
+            container.style.gridTemplateRows = `repeat(${bestLayout.rows}, ${bestLayout.height}px)`;
+        }
+
+        // Оптимизация ресайза
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(calculateGrid, 100);
+        });
+
+        // Инициализация
+        calculateGrid();
+    </script>
+
+    <script>
+        // Previous JavaScript remains
+
+        // Control buttons logic
+        const micToggle = document.getElementById('micToggle');
+        const audioToggle = document.getElementById('audioToggle');
+        
+        let isMicMuted = false;
+        let isAudioMuted = false;
+
+        micToggle.addEventListener('click', () => {
+            isMicMuted = !isMicMuted;
+            micToggle.classList.toggle('active', !isMicMuted);
+            // Add actual microphone toggle logic here
+        });
+
+        audioToggle.addEventListener('click', () => {
+            isAudioMuted = !isAudioMuted;
+            audioToggle.classList.toggle('active', !isAudioMuted);
+            // Add actual audio toggle logic here
+        });
+
+        document.getElementById('screenShare').addEventListener('click', () => {
+            // Add screen sharing logic here
+        });
+
+        document.getElementById('leaveCall').addEventListener('click', () => {
+            // Add leave call logic here
+            window.close();
+        });
+    </script>
+</body>
+</html>

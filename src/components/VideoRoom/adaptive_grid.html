@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom-like Adaptive Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #1a1a1a;
+            padding: 20px;
+        }
+
+        .grid-container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            gap: 15px;
+            justify-content: center;
+            align-content: center;
+            padding: 10px;
+        }
+
+        .tile {
+            background: #2d2d2d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: calc(10px + 1vw);
+            aspect-ratio: 4/3;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="tile">Tile 1</div>
+        <div class="tile">Tile 2</div>
+        <div class="tile">Tile 3</div>
+        <div class="tile">Tile 4</div>
+        <div class="tile">Tile 5</div>
+        <div class="tile">Tile 6</div>
+    </div>
+
+    <script>
+        function calculateGrid() {
+            const container = document.querySelector('.grid-container');
+            const tiles = document.querySelectorAll('.tile');
+            const gap = 15; // Совпадает с gap в CSS
+            
+            // Получаем размеры контейнера с учетом padding
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            
+            const tileCount = tiles.length;
+            let bestLayout = { cols: 1, rows: 1 };
+            
+            // Находим оптимальное количество колонок и рядов
+            for (let cols = 1; cols <= tileCount; cols++) {
+                const rows = Math.ceil(tileCount / cols);
+                
+                // Рассчитываем размеры плитки
+                const tileWidth = (containerWidth - (cols - 1) * gap) / cols;
+                const tileHeight = (containerHeight - (rows - 1) * gap) / rows;
+                
+                // Проверяем соотношение сторон
+                const aspectRatio = tileWidth / tileHeight;
+                const targetRatio = 4/3;
+                
+                // Вычисляем реальный размер с учетом соотношения
+                let width, height;
+                if (aspectRatio > targetRatio) {
+                    height = tileHeight;
+                    width = height * targetRatio;
+                } else {
+                    width = tileWidth;
+                    height = width / targetRatio;
+                }
+                
+                // Если все плитки помещаются - сохраняем лучший вариант
+                if (width * cols + gap * (cols - 1) <= containerWidth &&
+                    height * rows + gap * (rows - 1) <= containerHeight) {
+                    if (width * height > (bestLayout.width || 0) * (bestLayout.height || 0)) {
+                        bestLayout = { cols, rows, width, height };
+                    }
+                }
+            }
+            
+            // Применяем лучший вариант
+            container.style.gridTemplateColumns = `repeat(${bestLayout.cols}, ${bestLayout.width}px)`;
+            container.style.gridTemplateRows = `repeat(${bestLayout.rows}, ${bestLayout.height}px)`;
+        }
+
+        // Оптимизация ресайза
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(calculateGrid, 100);
+        });
+
+        // Инициализация
+        calculateGrid();
+    </script>
+</body>
+</html>
