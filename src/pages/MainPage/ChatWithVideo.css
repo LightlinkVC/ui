@@ -88,4 +88,27 @@
 .call-button:hover .call-icon {
     transform: rotate(-10deg) scale(1.1);
 }
+
+.chat-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin: 0 15px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+  font-weight: 500;
+}
   

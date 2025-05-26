@@ -16,13 +16,20 @@ interface VideoCallProps {
   centrifugoUrl: string;
   centToken: string;
   channels: { room: string; user: string };
+  onTranscriptionUpdate: (text: string) => void;
 }
 
 interface RoomMeta {
   existingUserIds: string[],
 }
 
-const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, centToken, channels }) => {
+const VideoRoom: React.FC<VideoCallProps> = observer(({ 
+  roomId, 
+  centrifugoUrl, 
+  centToken, 
+  channels,
+  onTranscriptionUpdate  
+}) => {
   const publisherPeerRef = useRef<any>(null);
   const subscribersPeersRef = useRef<Map<string, any>>(new Map());
   const centrifugeRef = useRef<Centrifuge | null>(null);
@@ -101,6 +108,9 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
         break;
       case "media_change":
         handleMediaChange(msg.payload);
+        break;
+      case "transcription_update":
+        handleTranscriptionUpdate(msg.payload);
         break;
       default:
         console.log("Неизвестное сообщение", msg);
@@ -293,6 +303,11 @@ const VideoRoom: React.FC<VideoCallProps> = observer(({ roomId, centrifugoUrl, c
     } else {
       showVideoPlaceholder(mediaStatus.user_id, defaultAvatar)
     }
+  }
+
+  const handleTranscriptionUpdate = (transcriptionUpdate: {content: string}) => {
+    console.log("TRANSCRIPTION: ", transcriptionUpdate)
+    onTranscriptionUpdate(transcriptionUpdate.content);
   }
 
   const handleSubscriberIceCandidate = (subCandidate: {candidate: RTCIceCandidateInit, targetUserId: string}) => {
