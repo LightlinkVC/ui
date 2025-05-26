@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import ChatWindow from '../../components/Friends/ChatWindow';
+import TranscriptWindow from '../../components/Friends/TranscriptWindow';
 import VideoRoom from '../../components/VideoRoom/VideoRoom';
 import BackButton from '../../components/UI/BackButton/HomeButton';
 import { axiosInstance } from "../../api/api.config";
@@ -10,13 +11,20 @@ import './ChatWithVideo.css'
 
 const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const { groupId } = useParams();
-
+  const [activeTab, setActiveTab] = useState<'chat' | 'transcript'>('chat');
+  const [transcriptMessages, setTranscriptMessages] = useState<string[]>([]);
   const [centToken, setCentToken] = useState<string | null>(null);
   const [channels, setChannels] = useState<{ room: string; group_messages: string; user: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const activeRoomId = useCallStore((state) => state.activeRoomId);
 
   const isMobile = useIsMobile();
+
+  const handleTranscriptionUpdate = (transcription: string) => {
+    if (transcription.trim().length > 0) {
+      setTranscriptMessages(prev => [...prev, transcription]);
+    }
+  };
 
   if (!groupId) {
     return <div>Неверный или отсутствующий идентификатор группы</div>;
@@ -72,21 +80,43 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
         </div>
         
         {activeRoomId === groupId.toString() && (
-          <VideoRoom
-            roomId={activeRoomId}
-            centrifugoUrl={centrifugoUrl}
-            centToken={centToken}
-            channels={{ room: channels.room, user: channels.user }}
-          />
+          <>
+            <VideoRoom
+              roomId={activeRoomId}
+              centrifugoUrl={centrifugoUrl}
+              centToken={centToken}
+              channels={{ room: channels.room, user: channels.user }}
+              onTranscriptionUpdate={handleTranscriptionUpdate}
+            />
+
+            <div className="chat-tabs">
+              <button 
+                className={`tab-button ${activeTab === 'chat' ? 'active' : ''}`}
+                onClick={() => setActiveTab('chat')}
+              >
+                Чат
+              </button>
+              <button 
+                className={`tab-button ${activeTab === 'transcript' ? 'active' : ''}`}
+                onClick={() => setActiveTab('transcript')}
+              >
+                Транскрипция
+              </button>
+            </div>
+          </>
         )}
 
         <div className="chat-body">
-          <ChatWindow 
-            groupId={Number(groupId)} 
-            centrifugoUrl={centrifugoUrl}
-            centToken={centToken}
-            channels={channels}
-          />
+          {activeTab === 'chat' ? (
+            <ChatWindow 
+              groupId={Number(groupId)} 
+              centrifugoUrl={centrifugoUrl}
+              centToken={centToken}
+              channels={channels}
+            />
+          ) : (
+            <TranscriptWindow messages={transcriptMessages} />
+          )}
         </div>
       </div>
     </div>
