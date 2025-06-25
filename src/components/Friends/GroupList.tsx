@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import './GroupList.css';
 import defaultGroupAvatar from '../assets/default-group-avatar.png';
+import defaultAvatar from '../assets/default-avatar.png'
 import AddGroupButton from '../../components/UI/AddGroupButton/AddGroupButton';
 import Modal from './Modal';
 
@@ -31,7 +32,6 @@ const GroupList = ({ onGroupSelect }: GroupListProps) => {
   const [friends, setFriends] = useState<FriendMeta[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<{user_id: number; role: string}[]>([]);
 
-  // Загрузка групп
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -46,7 +46,6 @@ const GroupList = ({ onGroupSelect }: GroupListProps) => {
     fetchGroups();
   }, []);
 
-  // Загрузка друзей для модалки
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -68,10 +67,8 @@ const GroupList = ({ onGroupSelect }: GroupListProps) => {
 
       const response = await axiosInstance.post('/api/groups', request);
       
-      // Обновляем список групп
       setGroups(prev => [...prev, response.data]);
       
-      // Закрываем модалку и сбрасываем состояние
       setIsModalOpen(false);
       setGroupName('');
       setSelectedFriends([]);
@@ -132,6 +129,16 @@ const GroupList = ({ onGroupSelect }: GroupListProps) => {
                     checked={selectedFriends.some(f => f.user_id === friend.user_id)}
                     onChange={() => toggleFriendSelection(friend)}
                   />
+                  <div 
+                    className="group-friend-avatar" 
+                    data-has-avatar={!!friend.avatar}
+                    data-initial={friend.username[0].toUpperCase()}
+                  >
+                    <img 
+                      src={friend.avatar || defaultAvatar} 
+                      alt={friend.username}
+                    />
+                  </div>
                   {friend.username}
                 </label>
 

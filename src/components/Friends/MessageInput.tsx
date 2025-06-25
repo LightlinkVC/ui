@@ -38,7 +38,7 @@ const MessageInput = ({ groupId, lastId, onNewMessage }: MessageInputProps) => {
     if (!message.trim() && files.length === 0) return;
 
     const tempDate = new Date();
-    const tempMessageId = lastId + 1;
+    const tempMessageId = lastId ? lastId + 1 : 1;
 
     const tempMessage = {
       user_id: authStore.userId,
@@ -71,7 +71,8 @@ const MessageInput = ({ groupId, lastId, onNewMessage }: MessageInputProps) => {
         file: file.file
       }));
 
-      onNewMessage(tempMessage);
+      // todo dedup
+      // onNewMessage(tempMessage);
 
       const response = await axiosInstance.post('/api/messages', formData, {
         headers: {
@@ -84,7 +85,7 @@ const MessageInput = ({ groupId, lastId, onNewMessage }: MessageInputProps) => {
         ...tempMessage,
         ...serverMessage,
         isTemp: false,
-        files: response.data.files.map((f: any) => ({
+        files: response.data.files?.map((f: any) => ({
           ...f,
           status: 'uploaded'
         }))

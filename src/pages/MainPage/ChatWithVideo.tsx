@@ -9,10 +9,15 @@ import { useCallStore } from '../../store/CallStore';
 import useIsMobile from '../../hooks/Mobile/useIsMobile';
 import './ChatWithVideo.css'
 
+interface TranscriptMessage {
+  message: string;
+  timestamp: Date;
+}
+
 const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
   const { groupId } = useParams();
   const [activeTab, setActiveTab] = useState<'chat' | 'transcript'>('chat');
-  const [transcriptMessages, setTranscriptMessages] = useState<string[]>([]);
+  const [transcriptMessages, setTranscriptMessages] = useState<TranscriptMessage[]>([]);
   const [centToken, setCentToken] = useState<string | null>(null);
   const [channels, setChannels] = useState<{ room: string; group_messages: string; user: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +27,7 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
 
   const handleTranscriptionUpdate = (transcription: string) => {
     if (transcription.trim().length > 0) {
-      setTranscriptMessages(prev => [...prev, transcription]);
+      setTranscriptMessages(prev => [...prev, { message: transcription, timestamp: new Date() }]);
     }
   };
 
@@ -72,11 +77,13 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
             <BackButton />
           )}
           <span className="chat-username">Группа #{groupId}</span>
-          <button onClick={handleCallClick} className="call-button">
-            <svg className="call-icon" width="20" height="20" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-            </svg>
-          </button>
+          {!activeRoomId && (
+            <button onClick={handleCallClick} className="call-button">
+              <svg className="call-icon" width="20" height="20" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+              </svg>
+            </button>
+          )}
         </div>
         
         {activeRoomId === groupId.toString() && (
@@ -107,7 +114,7 @@ const ChatWithVideo = ({ centrifugoUrl }: { centrifugoUrl: string }) => {
         )}
 
         <div className="chat-body">
-          {activeTab === 'chat' ? (
+          {activeTab === 'chat' || !activeRoomId ? (
             <ChatWindow 
               groupId={Number(groupId)} 
               centrifugoUrl={centrifugoUrl}

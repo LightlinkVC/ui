@@ -138,10 +138,16 @@ const Layout: FC = () => {
   }
 
   const handleIncomingMessage = (incomingMessageRequest: IncomingMessagePayload) => {
-    useIncomingMessageModalStore.getState().show(
-      incomingMessageRequest.fromUsername,
-      incomingMessageRequest.content
-    );
+    const currentGroupId = useCallStore.getState().activeGroupId;
+    console.log(useCallStore.getState().activeGroupId)
+    console.log(currentGroupId)
+    console.log(incomingMessageRequest.roomId != currentGroupId)
+    if (incomingMessageRequest.roomId != currentGroupId) {
+      useIncomingMessageModalStore.getState().show(
+        incomingMessageRequest.fromUsername,
+        incomingMessageRequest.content
+      );
+    }
   }
 
   // // debug only (incoming call)
@@ -167,16 +173,6 @@ const Layout: FC = () => {
   //     "DevUser",
   //     "Тестовове сообщение"
   //   );
-  // }, []);
-
-  // useEffect(() => {
-  //   let incomingCallRequest: IncomingCallPayload = {
-  //     fromUserId: "1",
-  //     fromUsername: "test",
-  //     toUserId: "2",
-  //     roomId: "1",
-  //   }
-  //   handleIncomingCall(incomingCallRequest)
   // }, []);
 
   const handleIncomingCall = (incomingCallRequest: IncomingCallPayload) => {

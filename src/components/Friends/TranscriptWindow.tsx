@@ -1,8 +1,14 @@
 import React from 'react';
+import FormatTimestamp from './utils/DateFormatter';
 import './TranscriptWindow.css';
 
+interface TranscriptMessage {
+  message: string;
+  timestamp: Date;
+}
+
 interface TranscriptWindowProps {
-  messages: string[];
+  messages: TranscriptMessage[];
 }
 
 const TranscriptWindow: React.FC<TranscriptWindowProps> = ({ messages }) => {
@@ -13,9 +19,9 @@ const TranscriptWindow: React.FC<TranscriptWindowProps> = ({ messages }) => {
           <div key={index} className="transcript-message message">
             <div className="message-header">
               <span className="transcript-icon">🎤</span>
-              <span className="message-time">{new Date().toLocaleTimeString()}</span>
+              <span className="message-time">{FormatTimestamp(message.timestamp)}</span>
             </div>
-            <div className="message-content">{message}</div>
+            <div className="message-content">{message.message}</div>
           </div>
         ))}
       </div>

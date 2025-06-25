@@ -1,45 +1,99 @@
-.fr-toast {
+/* FriendRequestModal.css */
+.discord-fr-toast {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #fff;
+    background-color: #36393f;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    padding: 12px 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    padding: 14px;
     z-index: 9999;
-    max-width: 300px;
-    animation: slideIn 0.3s ease-out;
-  }
-  
-  .fr-toast-content {
+    max-width: 320px;
+    animation: discordSlideIn 0.3s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.discord-fr-toast-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-  }
-  
-  .fr-toast-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
-    cursor: pointer;
+}
+
+.discord-fr-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.discord-fr-avatar {
+    width: 40px;
+    height: 40px;
+    background: #202225;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.discord-fr-avatar-initial {
+    font-size: 18px;
+    font-weight: 700;
+    color: #b9bbbe;
+}
+
+.discord-fr-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.discord-fr-username {
+    color: #ffffff;
+    font-weight: 500;
     font-size: 14px;
-  }
-  
-  .fr-toast-button:hover {
-    background-color: #0056b3;
-  }
-  
-  @keyframes slideIn {
+}
+
+.discord-fr-message {
+    color: #b9bbbe;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.discord-fr-toast-button {
+    background: #2f3136;
+    color: #b9bbbe;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.discord-fr-toast-button:hover {
+    background: #ed4245;
+    color: white;
+}
+
+.discord-fr-toast-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes discordSlideIn {
     from {
-      opacity: 0;
-      transform: translateY(20px);
+        opacity: 0;
+        transform: translateY(20px);
     }
     to {
-      opacity: 1;
-      transform: translateY(0);
+        opacity: 1;
+        transform: translateY(0);
     }
-  }
-  
+}

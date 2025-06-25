@@ -8,6 +8,7 @@ import useIsMobile from '../../hooks/Mobile/useIsMobile';
 import BackButton from '../../components/UI/BackButton/HomeButton';
 import AddFriendButton from '../../components/UI/AddFriendButton/AddFriendButton';
 import { Users, Bell, Home } from 'lucide-react';
+import { useCallStore } from '../../store/CallStore';
 import './TestMainPage.css';
 
 const TestMainPage = () => {
@@ -24,6 +25,7 @@ const TestMainPage = () => {
     try {
       const response = await axiosInstance.get(`/api/get-group-id/${friendId}`);
       const groupId = response.data.group_id;
+      useCallStore.getState().activateGroup(groupId.toString())
       navigate(`/chat/${groupId}`);
     } catch (error) {
       console.error("Error fetching group ID:", error);
@@ -31,6 +33,7 @@ const TestMainPage = () => {
   };
 
   const handleGroupSelect = (groupId: number) => {
+    useCallStore.getState().activateGroup(groupId.toString())
     navigate(`/chat/${groupId}`);
   };
 

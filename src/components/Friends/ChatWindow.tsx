@@ -109,6 +109,7 @@ const ChatWindow = observer(({ groupId, centrifugoUrl, centToken, channels }: Ch
   }, [messages]);
 
 const handleNewMessage = (newMessage: Message) => {
+  console.log("On new Message with id: ", newMessage.id)
   setMessages(prev => {
     if (!Array.isArray(prev)) return [newMessage];
     
@@ -157,7 +158,7 @@ const handleNewMessage = (newMessage: Message) => {
         }
         break;
       case "hateUpdate":
-        handleUpdateMessageStatus(msg.payload.id, 'hate');
+        handleUpdateMessageStatus(msg.payload.message_id, 'hate');
         break;
       default:
         console.log("Неизвестное сообщение", msg);
@@ -186,11 +187,13 @@ const handleNewMessage = (newMessage: Message) => {
   }
 
   const handleUpdateMessageStatus = (messageId: number, newStatus: string) => {
-    setMessages(prevMessages =>
-      prevMessages.map(message => 
+    setMessages((prevMessages) => {
+      const updatedMessages = prevMessages.map(message =>
         message.id === messageId ? { ...message, status: newStatus } : message
-      )
-    );
+      );
+
+      return updatedMessages;
+    });
   };
 
   const handleMessageClick = (messageId: number) => {
@@ -267,7 +270,7 @@ const handleNewMessage = (newMessage: Message) => {
       <div className="input-wrapper">
         <MessageInput 
           groupId={groupId} 
-          lastId={messages.length > 0 ? messages[messages.length - 1].id : -1} 
+          lastId={messages.length > 0 ? messages[messages.length - 1].id : 0} 
           onNewMessage={handleNewMessage} 
         />
       </div>
