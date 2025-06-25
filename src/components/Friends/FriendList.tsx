@@ -1,8 +1,7 @@
-// FriendList.tsx
 import { useState, useEffect } from 'react';
 import { axiosInstance } from "../../api/api.config";
 import { authStore } from "../../store/AuthStore";
-import './FriendList.css'; // Создадим новый файл стилей
+import './FriendList.css';
 import defaultAvatar from '../assets/default-avatar.png'
 
 type FriendMeta = {

@@ -1,39 +1,74 @@
-.im-toast {
+/* IncomingMessageModal.css */
+.discord-toast {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #fff;
+    background-color: #36393f;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    padding: 12px 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    padding: 16px;
     z-index: 9999;
-    max-width: 300px;
+    max-width: 320px;
     animation: slideIn 0.3s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #dcddde;
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.im-header {
+.discord-toast-header {
     font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.im-message {
-    background-color: #f5f5f5;
-    padding: 8px;
-    border-radius: 4px;
     margin-bottom: 12px;
-    font-style: italic;
-    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 16px;
 }
 
-.im-ok-button {
-    background-color: #007bff;
+.discord-message-icon {
+    color: #b9bbbe;
+    flex-shrink: 0;
+}
+
+.discord-username {
+    color: #7289da;
+    font-weight: 600;
+}
+
+.discord-toast-message {
+    background-color: #2f3136;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.4;
+    border-left: 3px solid #7289da;
+}
+
+.discord-ok-button {
+    background-color: #7289da;
     color: white;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 4px;
     border: none;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    width: 100%;
+    transition: background-color 0.2s ease;
 }
 
-.im-ok-button:hover {
-    background-color: #0056b3;  
+.discord-ok-button:hover {
+    background-color: #677bc4;  
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
